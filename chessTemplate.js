@@ -1,18 +1,18 @@
-
 //Board:
 var boardSize = 8;
-var tileSize = 50;
-var tiles = new Array(8);
+var tileSize = 50; //in pixels
+
+var tiles = new Array(boardSize);
 for(let i = 0; i < tiles.length; i++){
   tiles[i] = new Array;
-}
-//- Generation
+} //2d array of length boardSize
 
 let canvas = this.document.getElementById('myCanvas');
 let ctx = canvas.getContext('2d');
 
-for(let x=0; x<boardSize; x++){
+for(let x=0; x<boardSize; x++){ //alternate between colors on board
   for(let y=0; y<boardSize; y++){
+
     let colourSwitch = false;
     if(x%2 == y%2){
       colourSwitch = true;
@@ -22,45 +22,76 @@ for(let x=0; x<boardSize; x++){
     }
   }
 }
+
+//- Display
 function drawBoard(){
   for(let x=0; x<boardSize; x++) {
     for(let y=0; y<boardSize; y++) {
-      //console.log(tiles[x,y]);
       if(tiles[x][y].invert){
         ctx.fillStyle ='white';
       }else{
         ctx.fillStyle = 'grey';
       }
-      ctx.fillRect(x*50,y*50,tileSize,tileSize);
+      ctx.fillRect(x*50,y*50,tileSize,tileSize); //draw alternating colors
     }
   }
 }
-drawBoard();
 
-//Piece Data:
-function piece(){
+//- Piece Data:
+function piece(points, img, movement, row, column, side){
+  /*main pieces will only have the points, img, and movement parameters
+  omitting the last 3 parameters for the main pieces will not ruin anything and will keep the location and side undefined
+  use all parameters to make a really custom specific piece*/
   return{
-    r: undefined,
-    c: undefined,
-    points: undefined,
-    img: undefined,
-    movement: undefined,
-    side: undefined
+    points: points,
+    img: img,
+    checkMove: movement,
+    row: row,
+    column: column,
+    side: side,
   }
 }
 
-function king(){
-  let k = piece();
-  k.points = 100;
-  k.movement = function(r1,c1){
-  }
-  //k.img =
+function setPosition(object, row, column, side){
+  object.row = row;
+  object.column = column;
+  object.side = side;
 }
-function queen(){
-  let q = piece();
-  q.points = 9;
-  //q.movement =
-  //q.img =
+
+function king(row, column, side){
+  let k = piece(100,undefined,
+    function(newRow, newColumn){ //move check
+        let distX = Math.abs(newRow-row);
+        let distY = Math.abs(newColumn-column);
+
+        if(distX <= 1 && distY <= 1){ //Check if move is only 1 block away
+          if(!(distX == 0 && distY == 0)){ //make sure the new position is actually new
+            return true;
+          }
+        }
+        return false;
+      }
+  );
+
+  setPosition(k, row, column, side);
+  return k;
+}
+function queen(row, column, side){
+  let q = piece(9, undefined,
+    function(newRow, newColumn){ //move check
+      if(newRow == row && newColumn == colum){return false;} //make sure new position is different
+
+      if(newRow == row || newColumn == column){return true;}//vertical check
+
+      let distX = Math.abs(newRow-row);
+      let distY = Math.abs(newColumn-column); //diagonal check
+      if(distY == distX){return true;}
+      return false;
+    }
+  );
+
+  setPosition(q, row, column, side)
+  return q;
 }
 function rook(){
   let r = piece();
@@ -94,6 +125,9 @@ function pawn(){
   //p.img =
 }
 
+window.onload = function(){
+  drawBoard();
+}
 
 /*
 

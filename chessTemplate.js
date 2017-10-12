@@ -57,7 +57,7 @@ function setPosition(object, row, column, side){
   object.column = column;
   object.side = side;
 }
-
+//King
 function king(row, column, side){
   let k = piece(100,undefined,
     function(newRow, newColumn){ //move check
@@ -76,12 +76,13 @@ function king(row, column, side){
   setPosition(k, row, column, side);
   return k;
 }
+//Queen
 function queen(row, column, side){
   let q = piece(9, undefined,
     function(newRow, newColumn){ //move check
       if(newRow == row && newColumn == colum){return false;} //make sure new position is different
 
-      if(newRow == row || newColumn == column){return true;}//vertical check
+      if(newRow == row || newColumn == column){return true;}//x y check
 
       let distX = Math.abs(newRow-row);
       let distY = Math.abs(newColumn-column); //diagonal check
@@ -90,39 +91,95 @@ function queen(row, column, side){
     }
   );
 
-  setPosition(q, row, column, side)
+  setPosition(q, row, column, side);
   return q;
 }
-function rook(){
-  let r = piece();
-  r.points = 5;
-  r.movement = function(r1,c1){
-  }
-  //r.img =
-}
-function knight(){
-  let kn = piece();
-  kn.points = 3;
-  kn.movement = function(r1,c1){
-  }
-  //kn.img =
-}
-function bishop(){
-  let b = piece();
-  b.points = 3;
-  b.movement = function(r1,c1){
-    if(Math.abs(c1 - c) = Math.abs(r1 - r)){
-      return true;
+//Rook
+function rook(row, column, side){
+  let r = piece(5, undefined,
+    function(newRow, newColumn){
+      if(newRow == row && newColumn == colum){return false;}
+      if(newRow == row || newColumn == column){return true;}//x y check
+      return false;
     }
-    return false;
-  }
-  //b.img =
+  );
+
+  setPosition(r, row, column, side);
+  return r;
 }
-function pawn(){
-  let p = piece();
-  p.points = 1;
-  //p.movement =
-  //p.img =
+//Knight
+function knight(row, column, side){
+  let kn = piece(3, undefined,
+    function(newRow, newColumn){
+      if(newRow == row && newColumn == colum){return false;}//not same spot
+      if(Math.abs(newRow - row) == 1 && Math.abs(newColumn - column) == 2 || Math.abs(newRow - row) == 2 && Math.abs(newColumn - column) == 2){return true;}
+      //if x has a difference of 2 while y has a difference of 1, or vice versa.
+      return false;
+    }
+  );
+
+  setPosition(kn, row, column, side);
+  return kn;
+}
+//Bishop
+function bishop(row, column, side){
+  let b = piece(3, undefined,
+    function(newRow, newColumn){
+      if(newRow == row && newColumn == column){return false;}//not same spot
+      let distX = Math.abs(newRow-row);
+      let distY = Math.abs(newColumn-column); //diagonal check
+      if(distY == distX){return true;}
+      return false;
+    }
+  );
+
+  setPosition(b, row, column, side);
+  return b;
+}
+//Pawn
+function pawn(row, column, side){
+  let p = piece(1, undefined,
+    function(newRow, newColumn){
+      if(newRow == row && newColumn == column){return false;}
+      if(newRow - row == 2 || Math.abs(newRow - row) == 1 && newColumn == column|| Math.abs(newColumn - column) == 1 && newRow == row){return true;} //fwd 2, or 1 NESW
+      return false;
+    }
+  );
+  setPosition(p, row, column, side);
+  return p;
+}
+
+function drawPiece(piece){
+  ctx.drawImage(piece.img, piece.row*tileSize, piece.column*tileSize);
+}
+
+function defaultBoard(){
+  //White side
+  let wk = king(boardSize, 4, "white");
+  let wq = queen(boardSize, 5, "white");
+  let wr1 = rook(boardSize, 1, "white");
+  let wr2 = rook(boardSize, 8, "white");
+  let wkn1 = knight(boardSize, 2, "white");
+  let wkn2 = knight(boardSize, 7, "white");
+  let wb1 = bishop(boardSize, 3, "white");
+  let wb2 = bishop(boardSize, 6, "white");
+  let wp = new Array(boardSize);
+  for(i=0; i < wp.length; i++){
+    wp[i] = pawn(boardSize - 1, i, "white");
+  }
+  //Black side
+  let bk = king(1, 4, "black");
+  let bq = queen(1, 5, "black");
+  let br1 = rook(1, 1, "black");
+  let br2 = rook(1, 8, "black");
+  let bkn1 = knight(1, 2, "black");
+  let bkn2 = knight(1, 7, "black");
+  let bb1 = bishop(1, 3, "black");
+  let bb2 = bishop(1, 6, "black");
+  let bp = new Array(boardSize);
+  for(i=0; i < bp.length; i++){
+    bp[i] = pawn(1, i, "black");
+  }
 }
 
 window.onload = function(){
@@ -150,3 +207,4 @@ Indicicators of Movement:
 - Validity Checks
 
 */
+

@@ -149,6 +149,39 @@ function pawn(row, column, side){
   return p;
 }
 
+function drawPiece(piece){
+  ctx.drawImage(piece.img, piece.row*tileSize, piece.column*tileSize);
+}
+
+function defaultBoard(){
+  //White side
+  let wk = king(boardSize, 4, "white");
+  let wq = queen(boardSize, 5, "white");
+  let wr1 = rook(boardSize, 1, "white");
+  let wr2 = rook(boardSize, 8, "white");
+  let wkn1 = knight(boardSize, 2, "white");
+  let wkn2 = knight(boardSize, 7, "white");
+  let wb1 = bishop(boardSize, 3, "white");
+  let wb2 = bishop(boardSize, 6, "white");
+  let wp = new Array(boardSize);
+  for(i=0; i < wp.length; i++){
+    wp[i] = pawn(boardSize - 1, i, "white");
+  }
+  //Black side
+  let bk = king(1, 4, "black");
+  let bq = queen(1, 5, "black");
+  let br1 = rook(1, 1, "black");
+  let br2 = rook(1, 8, "black");
+  let bkn1 = knight(1, 2, "black");
+  let bkn2 = knight(1, 7, "black");
+  let bb1 = bishop(1, 3, "black");
+  let bb2 = bishop(1, 6, "black");
+  let bp = new Array(boardSize);
+  for(i=0; i < bp.length; i++){
+    bp[i] = pawn(1, i, "black");
+  }
+}
+
 window.onload = function(){
   drawBoard();
 }

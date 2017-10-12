@@ -20,7 +20,6 @@ for(let x=0; x<boardSize; x++){ //alternate between colors on board
     tiles[x][y] = {
       invert: colourSwitch,
     }
-
   }
 }
 
@@ -91,7 +90,7 @@ function queen(row, column, side){
     }
   );
 
-  setPosition(q, row, column, side)
+  setPosition(q, row, column, side);
   return q;
 }
 function rook(row, column, side){
@@ -103,11 +102,11 @@ function rook(row, column, side){
     }
   );
 
-  setPosition(r, row, column, side)
+  setPosition(r, row, column, side);
   return r;
 }
 function knight(row, column, side){
-  let kn = piece(5, undefined,
+  let kn = piece(3, undefined,
     function(newRow, newColumn){ //move check
       let distX = Math.abs(newRow-row);
       let distY = Math.abs(newColumn-column);
@@ -122,7 +121,7 @@ function knight(row, column, side){
   return kn;
 }
 function bishop(row, column, side){
-  let b = piece(5, undefined,
+  let b = piece(3, undefined,
     function(newRow, newColumn){ //move check
       if(newRow == row && newColumn == column){return false;} //make sure new position is different
 

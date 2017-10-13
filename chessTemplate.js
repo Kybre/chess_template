@@ -57,7 +57,7 @@ function setPosition(object, row, column, side){
   object.column = column;
   object.side = side;
 }
-//King
+
 function king(row, column, side){
   let k = piece(100,undefined,
     function(newRow, newColumn){ //move check
@@ -76,11 +76,10 @@ function king(row, column, side){
   setPosition(k, row, column, side);
   return k;
 }
-//Queen
 function queen(row, column, side){
   let q = piece(9, undefined,
     function(newRow, newColumn){ //move check
-      if(newRow == row && newColumn == colum){return false;} //make sure new position is different
+      if(newRow == row && newColumn == column){return false;} //make sure new position is different
 
       if(newRow == row || newColumn == column){return true;}//x y check
 
@@ -94,11 +93,10 @@ function queen(row, column, side){
   setPosition(q, row, column, side);
   return q;
 }
-//Rook
 function rook(row, column, side){
   let r = piece(5, undefined,
-    function(newRow, newColumn){
-      if(newRow == row && newColumn == colum){return false;}
+    function(newRow, newColumn){ //move check
+      if(newRow == row && newColumn == column){return false;} //make sure new position is different
       if(newRow == row || newColumn == column){return true;}//x y check
       return false;
     }
@@ -107,13 +105,14 @@ function rook(row, column, side){
   setPosition(r, row, column, side);
   return r;
 }
-//Knight
 function knight(row, column, side){
   let kn = piece(3, undefined,
-    function(newRow, newColumn){
-      if(newRow == row && newColumn == colum){return false;}//not same spot
-      if(Math.abs(newRow - row) == 1 && Math.abs(newColumn - column) == 2 || Math.abs(newRow - row) == 2 && Math.abs(newColumn - column) == 2){return true;}
-      //if x has a difference of 2 while y has a difference of 1, or vice versa.
+    function(newRow, newColumn){ //move check
+      let distX = Math.abs(newRow-row);
+      let distY = Math.abs(newColumn-column);
+      if((distX == 1 && distY == 2)||(distX == 2 && distY == 1)){ //2 steps 1 way, 1 step the other
+        return true;
+      }
       return false;
     }
   );
@@ -121,11 +120,11 @@ function knight(row, column, side){
   setPosition(kn, row, column, side);
   return kn;
 }
-//Bishop
 function bishop(row, column, side){
   let b = piece(3, undefined,
-    function(newRow, newColumn){
-      if(newRow == row && newColumn == column){return false;}//not same spot
+    function(newRow, newColumn){ //move check
+      if(newRow == row && newColumn == column){return false;} //make sure new position is different
+
       let distX = Math.abs(newRow-row);
       let distY = Math.abs(newColumn-column); //diagonal check
       if(distY == distX){return true;}
@@ -136,18 +135,10 @@ function bishop(row, column, side){
   setPosition(b, row, column, side);
   return b;
 }
-//Pawn
-function pawn(row, column, side){
-  let p = piece(1, undefined,
-    function(newRow, newColumn){
-      if(newRow == row && newColumn == column){return false;}
-      if(newRow - row == 2 || Math.abs(newRow - row) == 1 && newColumn == column|| Math.abs(newColumn - column) == 1 && newRow == row){return true;} //fwd 2, or 1 NESW
-      return false;
-    }
-  );
-  setPosition(p, row, column, side);
-  return p;
+function pawn(){
+  // too complicated for what we have now
 }
+
 
 function drawPiece(piece){
   ctx.drawImage(piece.img, piece.row*tileSize, piece.column*tileSize);

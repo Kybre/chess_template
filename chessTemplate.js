@@ -4,39 +4,31 @@ var tileSize = 50; //in pixels
 
 var tiles = new Array(boardSize);
 for(let i = 0; i < tiles.length; i++){
-  tiles[i] = new Array;
+  tiles[i] = new Array(boardSize);
+  for(let j = 0; j < tiles[i].length; j++){
+    let color = 'beige';
+    if(i%2 == j%2){color = 'grey';}
+    tiles[i][j] = {
+      color: color,
+      cell: undefined,
+      piece: undefined,
+    }
+  }
 } //2d array of length boardSize
 
-let canvas = this.document.getElementById('myCanvas');
-let ctx = canvas.getContext('2d');
-
-for(let x=0; x<boardSize; x++){ //alternate between colors on board
-  for(let y=0; y<boardSize; y++){
-
-    let colourSwitch = false;
-    if(x%2 == y%2){
-      colourSwitch = true;
-    }
-    tiles[x][y] = {
-      invert: colourSwitch,
-    }
-  }
-}
-
 //- Display
-function drawBoard(){
-  for(let x=0; x<boardSize; x++) {
-    for(let y=0; y<boardSize; y++) {
-      if(tiles[x][y].invert){
-        ctx.fillStyle ='white';
-      }else{
-        ctx.fillStyle = 'grey';
-      }
-      ctx.fillRect(x*50,y*50,tileSize,tileSize); //draw alternating colors
-    }
+let boardTable = document.getElementById("board");
+for(let y = 0; y < boardSize; y++){
+  let row = boardTable.insertRow(y);
+  for(let x = 0; x < boardSize; x++){
+    let cell = row.insertCell(x);
+    tiles[x][y].cell = cell;
+
+    cell.style = 'background-color:'+tiles[x][y].color;
+    cell.id = x+','+y;
+    cell.innerHTML = cell.id;
   }
 }
-
 //- Piece Data:
 function piece(points, img, movement, row, column, side){
   /*main pieces will only have the points, img, and movement parameters
@@ -79,9 +71,9 @@ function king(row, column, side){
 function queen(row, column, side){
   let q = piece(9, undefined,
     function(newRow, newColumn){ //move check
-      if(newRow == row && newColumn == colum){return false;} //make sure new position is different
+      if(newRow == row && newColumn == column){return false;} //make sure new position is different
 
-      if(newRow == row || newColumn == column){return true;}//vertical check
+      if(newRow == row || newColumn == column){return true;}//x y check
 
       let distX = Math.abs(newRow-row);
       let distY = Math.abs(newColumn-column); //diagonal check
@@ -93,40 +85,83 @@ function queen(row, column, side){
   setPosition(q, row, column, side)
   return q;
 }
-function rook(){
-  let r = piece();
-  r.points = 5;
-  r.movement = function(r1,c1){
-  }
-  //r.img =
-}
-function knight(){
-  let kn = piece();
-  kn.points = 3;
-  kn.movement = function(r1,c1){
-  }
-  //kn.img =
-}
-function bishop(){
-  let b = piece();
-  b.points = 3;
-  b.movement = function(r1,c1){
-    if(Math.abs(c1 - c) = Math.abs(r1 - r)){
-      return true;
+function rook(row, column, side){
+  let r = piece(5, undefined,
+    function(newRow, newColumn){ //move check
+      if(newRow == row && newColumn == column){return false;} //make sure new position is different
+      if(newRow == row || newColumn == column){return true;}//x y check
+      return false;
     }
-    return false;
-  }
-  //b.img =
+  );
+
+  setPosition(r, row, column, side)
+  return r;
+}
+function knight(row, column, side){
+  let kn = piece(5, undefined,
+    function(newRow, newColumn){ //move check
+      let distX = Math.abs(newRow-row);
+      let distY = Math.abs(newColumn-column);
+      if((distX == 1 && distY == 2)||(distX == 2 && distY == 1)){ //2 steps 1 way, 1 step the other
+        return true;
+      }
+      return false;
+    }
+  );
+
+  setPosition(kn, row, column, side);
+  return kn;
+}
+function bishop(row, column, side){
+  let b = piece(5, undefined,
+    function(newRow, newColumn){ //move check
+      if(newRow == row && newColumn == column){return false;} //make sure new position is different
+
+      let distX = Math.abs(newRow-row);
+      let distY = Math.abs(newColumn-column); //diagonal check
+      if(distY == distX){return true;}
+      return false;
+    }
+  );
+
+  setPosition(b, row, column, side);
+  return b;
 }
 function pawn(){
-  let p = piece();
-  p.points = 1;
-  //p.movement =
-  //p.img =
+  // too complicated for what we have now
+}
+
+function defaultBoard(){
+  //White side
+  let wk = king(boardSize, 4, "white");
+  let wq = queen(boardSize, 5, "white");
+  let wr1 = rook(boardSize, 1, "white");
+  let wr2 = rook(boardSize, 8, "white");
+  let wkn1 = knight(boardSize, 2, "white");
+  let wkn2 = knight(boardSize, 7, "white");
+  let wb1 = bishop(boardSize, 3, "white");
+  let wb2 = bishop(boardSize, 6, "white");
+  let wp = new Array(boardSize);
+  for(i=0; i < wp.length; i++){
+    wp[i] = pawn(boardSize - 1, i, "white");
+  }
+  //Black side
+  let bk = king(1, 4, "black");
+  let bq = queen(1, 5, "black");
+  let br1 = rook(1, 1, "black");
+  let br2 = rook(1, 8, "black");
+  let bkn1 = knight(1, 2, "black");
+  let bkn2 = knight(1, 7, "black");
+  let bb1 = bishop(1, 3, "black");
+  let bb2 = bishop(1, 6, "black");
+  let bp = new Array(boardSize);
+  for(i=0; i < bp.length; i++){
+    bp[i] = pawn(1, i, "black");
+  }
 }
 
 window.onload = function(){
-  drawBoard();
+
 }
 
 /*

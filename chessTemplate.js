@@ -7,7 +7,7 @@ for(let i = 0; i < tiles.length; i++){
   tiles[i] = new Array(boardSize);
   for(let j = 0; j < tiles[i].length; j++){
     let color = 'beige';
-    if(i%2 == j%2){color = 'grey';}
+    if(i%2 == j%2){color = 'peru';}
     tiles[i][j] = {
       color: color,
       cell: undefined,
@@ -17,16 +17,27 @@ for(let i = 0; i < tiles.length; i++){
 } //2d array of length boardSize
 
 //- Display
-let boardTable = document.getElementById("board");
-for(let y = 0; y < boardSize; y++){
-  let row = boardTable.insertRow(y);
-  for(let x = 0; x < boardSize; x++){
-    let cell = row.insertCell(x);
-    tiles[x][y].cell = cell;
+function makeBoard(){
+  let boardTable = document.getElementById("board");
+  for(let y = 0; y < boardSize; y++){
+    let row = boardTable.insertRow(y);
+    for(let x = 0; x < boardSize; x++){
+      let cell = row.insertCell(x);
+      tiles[x][y].cell = cell;
 
-    cell.style = 'background-color:'+tiles[x][y].color;
-    cell.id = x+','+y;
-    cell.innerHTML = cell.id;
+      cell.style = 'background-color:'+tiles[x][y].color;
+      cell.id = x+','+y;
+      //cell.innerHTML = cell.id;
+
+      let image = document.createElement('img');
+      image.src = 'more.png';
+      image.onload = function(){
+        let width = image.width;
+        let cellSize = 75; //constant 75 pixels, pls change to the css value?
+        image.style = 'margin-left:'+ (cellSize-width)/2; //centers image
+      };
+      cell.appendChild(image);
+    }
   }
 }
 //- Piece Data:
@@ -161,7 +172,7 @@ function defaultBoard(){
 }
 
 window.onload = function(){
-
+  makeBoard();
 }
 
 /*

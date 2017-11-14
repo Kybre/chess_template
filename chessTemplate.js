@@ -1,6 +1,7 @@
 //Board:
 var boardSize = 8;
 var tileSize = 50; //in pixels
+let pieces = new Array();
 
 var tiles = new Array(boardSize);
 for(let i = 0; i < tiles.length; i++){
@@ -24,19 +25,8 @@ function makeBoard(){
     for(let x = 0; x < boardSize; x++){
       let cell = row.insertCell(x);
       tiles[x][y].cell = cell;
-
       cell.style = 'background-color:'+tiles[x][y].color;
       cell.id = x+','+y;
-      //cell.innerHTML = cell.id;
-
-      let image = document.createElement('img');
-      image.src = 'more.png';
-      image.onload = function(){
-        let width = image.width;
-        let cellSize = 75; //constant 75 pixels, pls change to the css value?
-        image.style = 'margin-left:'+ (cellSize-width)/2; //centers image
-      };
-      cell.appendChild(image);
     }
   }
 }
@@ -62,7 +52,9 @@ function setPosition(object, row, column, side){
 }
 
 function king(row, column, side){
-  let k = piece(100,undefined,
+  let img = new Image();
+  img.src = 'images/bk.png';
+  let k = piece(100,img,
     function(newRow, newColumn){ //move check
         let distX = Math.abs(newRow-row);
         let distY = Math.abs(newColumn-column);
@@ -75,12 +67,13 @@ function king(row, column, side){
         return false;
       }
   );
-
   setPosition(k, row, column, side);
   return k;
 }
 function queen(row, column, side){
-  let q = piece(9, undefined,
+  let img = new Image();
+  img.src = 'images/bq.png';
+  let q = piece(9, img,
     function(newRow, newColumn){ //move check
       if(newRow == row && newColumn == column){return false;} //make sure new position is different
 
@@ -97,7 +90,9 @@ function queen(row, column, side){
   return q;
 }
 function rook(row, column, side){
-  let r = piece(5, undefined,
+  let img = new Image();
+  img.src = 'images/br.png';
+  let r = piece(5, img,
     function(newRow, newColumn){ //move check
       if(newRow == row && newColumn == column){return false;} //make sure new position is different
       if(newRow == row || newColumn == column){return true;}//x y check
@@ -109,7 +104,9 @@ function rook(row, column, side){
   return r;
 }
 function knight(row, column, side){
-  let kn = piece(5, undefined,
+  let img = new Image();
+  img.src = 'images/bn.png';
+  let kn = piece(5, img,
     function(newRow, newColumn){ //move check
       let distX = Math.abs(newRow-row);
       let distY = Math.abs(newColumn-column);
@@ -124,7 +121,9 @@ function knight(row, column, side){
   return kn;
 }
 function bishop(row, column, side){
-  let b = piece(5, undefined,
+  let img = new Image();
+  img.src = 'images/bb.png';
+  let b = piece(5, img,
     function(newRow, newColumn){ //move check
       if(newRow == row && newColumn == column){return false;} //make sure new position is different
 
@@ -142,37 +141,34 @@ function pawn(){
   // too complicated for what we have now
 }
 
-function defaultBoard(){
+function defaultBoardInit(){
   //White side
-  let wk = king(boardSize, 4, "white");
-  let wq = queen(boardSize, 5, "white");
-  let wr1 = rook(boardSize, 1, "white");
-  let wr2 = rook(boardSize, 8, "white");
-  let wkn1 = knight(boardSize, 2, "white");
-  let wkn2 = knight(boardSize, 7, "white");
-  let wb1 = bishop(boardSize, 3, "white");
-  let wb2 = bishop(boardSize, 6, "white");
-  let wp = new Array(boardSize);
-  for(i=0; i < wp.length; i++){
-    wp[i] = pawn(boardSize - 1, i, "white");
-  }
-  //Black side
-  let bk = king(1, 4, "black");
-  let bq = queen(1, 5, "black");
-  let br1 = rook(1, 1, "black");
-  let br2 = rook(1, 8, "black");
-  let bkn1 = knight(1, 2, "black");
-  let bkn2 = knight(1, 7, "black");
-  let bb1 = bishop(1, 3, "black");
-  let bb2 = bishop(1, 6, "black");
-  let bp = new Array(boardSize);
-  for(i=0; i < bp.length; i++){
-    bp[i] = pawn(1, i, "black");
+  let wk = king(3, 0, "white"); pieces.push(wk);
+  let wq = queen(4, 0, "white"); pieces.push(wq);
+  let wr1 = rook(0, 0, "white"); pieces.push(wr1);
+  let wr2 = rook(7, 0, "white"); pieces.push(wr2);
+  let wn1 = knight(1, 0, "white"); pieces.push(wn1);
+  let wn2 = knight(6, 0, "white"); pieces.push(wn2);
+  let wb1 = bishop(2, 0, "white"); pieces.push(wb1);
+  let wb2 = bishop(5, 0, "white"); pieces.push(wb2);
+
+}
+function replaceImages(){
+  for(let i = 0; i < pieces.length; i++){
+    tiles[pieces[i].row][pieces[i].column].piece = pieces[i];
+    let tile = document.getElementById(pieces[i].row+','+pieces[i].column);
+    while(tile.hasChildNodes()){
+      tile.removeChild(tile.lastChild);
+    }
+    tile.appendChild(pieces[i].img);
   }
 }
 
 window.onload = function(){
   makeBoard();
+  defaultBoardInit();
+
+  replaceImages();
 }
 
 /*

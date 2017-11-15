@@ -29,18 +29,19 @@ table{
 
   border-spacing: 0px;
 
-  margin-left: auto;
-  margin-right: auto;
-  table-layout:fixed;
-
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 td:hover{
-  background-color: cyan;
   border: 0.5vmin solid black;
+
 }
 img {
-    max-width: 100%;
-    max-height: 100%;
-    margin-left: auto;
-    margin-right: auto;
+  min-width: 70%;
+  max-width: 100%;
+
+  margin-left: auto;
+  margin-right: auto;
 }

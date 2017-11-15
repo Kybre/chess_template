@@ -117,8 +117,11 @@ function bishop(row, column, side){
     }, row, column, side);
   return b;
 }
-function pawn(){
-  // too complicated for what we have now
+function pawn(row, column, side){
+  let img = new Image();
+  img.src = 'images/'+side+'p.png';
+  let b = piece(5, img,function(newRow, newColumn){return false}, row, column, side);
+  return b;
 }
 
 function defaultBoardInit(){

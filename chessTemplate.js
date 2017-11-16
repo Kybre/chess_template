@@ -3,6 +3,8 @@ var boardSize = 8;
 var tileSize = 50; //in pixels
 let pieces = new Array();
 
+let holdingPiece = undefined;
+
 var tiles = new Array(boardSize);
 for(let i = 0; i < tiles.length; i++){
   tiles[i] = new Array(boardSize);
@@ -27,6 +29,7 @@ function makeBoard(){
       tiles[x][y].cell = cell;
       cell.style = 'background-color:'+tiles[x][y].color;
       cell.id = x+','+y;
+      cell.onclick = function (){tileClicked(x,y)};
     }
   }
 }
@@ -42,10 +45,10 @@ function piece(points, img, movement, row, column, side){
     row: row,
     column: column,
     side: side,
+    visible: true,
   }
 }
-
-function king(row, column, side){
+function king(column, row, side){
   let img = new Image();
   img.src = 'images/'+side+'k.png';
   let k = piece(100,img,
@@ -62,7 +65,7 @@ function king(row, column, side){
       }, row, column, side);
   return k;
 }
-function queen(row, column, side){
+function queen(column, row, side){
   let img = new Image();
   img.src = 'images/'+side+'q.png';
   let q = piece(9, img,
@@ -78,7 +81,7 @@ function queen(row, column, side){
     }, row, column, side)
   return q;
 }
-function rook(row, column, side){
+function rook(column, row, side){
   let img = new Image();
   img.src = 'images/'+side+'r.png';
   let r = piece(5, img,
@@ -89,7 +92,7 @@ function rook(row, column, side){
     }, row, column, side)
   return r;
 }
-function knight(row, column, side){
+function knight(column, row, side){
   let img = new Image();
   img.src = 'images/'+side+'n.png';
   let kn = piece(5, img,
@@ -103,7 +106,7 @@ function knight(row, column, side){
     }, row, column, side);
   return kn;
 }
-function bishop(row, column, side){
+function bishop(column, row, side){
   let img = new Image();
   img.src = 'images/'+side+'b.png';
   let b = piece(5, img,
@@ -117,11 +120,11 @@ function bishop(row, column, side){
     }, row, column, side);
   return b;
 }
-function pawn(row, column, side){
+function pawn(column, row, side){
   let img = new Image();
   img.src = 'images/'+side+'p.png';
-  let b = piece(5, img,function(newRow, newColumn){return false}, row, column, side);
-  return b;
+  let p = piece(5, img,function(newRow, newColumn){return false}, row, column, side);
+  return p;
 }
 
 function defaultBoardInit(){
@@ -147,13 +150,40 @@ function defaultBoardInit(){
 }
 function replaceImages(){
   for(let i = 0; i < pieces.length; i++){
-    tiles[pieces[i].row][pieces[i].column].piece = pieces[i];
-    let tile = tiles[pieces[i].row][pieces[i].column].cell;
+    tiles[pieces[i].column][pieces[i].row].piece = pieces[i]; //add the piece to the tile object
+    let tile = tiles[pieces[i].column][pieces[i].row].cell; //html element
+
     while(tile.hasChildNodes()){ //get rid of all current elements to add image
       tile.removeChild(tile.lastChild);
     }
-    tile.appendChild(pieces[i].img);
+    if(tiles[pieces[i].column][pieces[i].row].piece.visible == true){
+      tile.appendChild(pieces[i].img); //add the current piece image to the tile
+    }
   }
+}
+function movePiece(piece, newX, newY){
+  let oldX = piece.column;
+  let oldY = piece.row;
+
+  tiles[newX][newY].piece = piece; //add piece in new location
+  tiles[piece.column][piece.row].piece = undefined; //get rid of old piece
+  piece.row = newY;
+  piece.column = newX; //set position of piece
+
+}
+function tileClicked(x,y){
+  let tile = tiles[x][y];
+  if (holdingPiece == undefined){ //true if a piece hasn't already been selected
+    if (tile.piece != undefined){ // make sure theres a piece on the tile
+      holdingPiece = tile.piece;//store hold piece
+      holdingPiece.visible = false;
+    }
+  }else{
+    movePiece(holdingPiece, x,y); //move piece to desired location if a piece is being held
+    tile.piece.visible = true; //make piece in new location visible
+    holdingPiece = undefined; //stop holding piece
+  }
+  replaceImages();
 }
 
 window.onload = function(){

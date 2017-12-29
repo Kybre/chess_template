@@ -36,7 +36,12 @@ table{
 }
 td:hover{
   border: 0.5vmin solid black;
-
+}
+.black{
+  background-color: peru;
+}
+.white{
+  background-color: beige;
 }
 img {
   min-width: 70%;

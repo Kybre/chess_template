@@ -1,7 +1,7 @@
 //Board:
 var boardSize = 8;
 var tileSize = 50; //in pixels
-let pieces = new Array();
+let pieces = new Array(); //list of all pieces
 
 let wk, wq, wr1, wr2, wn1, wn2, wb1, wb2;// vars for white pieces
 
@@ -18,24 +18,24 @@ for(let i = 0; i < tiles.length; i++){
       piece: undefined,
     }
   }
-} //2d array of length boardSize
+} //2d array of length boardSize for holding the tile and piece in each position
 
 //- Display
 function makeBoard(){
-  let boardTable = document.getElementById("board");
+  let boardTable = document.getElementById("board"); //currently empty table
   for(let y = 0; y < boardSize; y++){
-    let row = boardTable.insertRow(y);
+    let row = boardTable.insertRow(y); //create row in table
     for(let x = 0; x < boardSize; x++){
-      let cell = row.insertCell(x);
+      let cell = row.insertCell(x); //add cells to row
       tiles[x][y].cell = cell;
-      if(x%2 == y%2){cell.classList.add('white');}else{cell.classList.add('black');}
+      if(x%2 == y%2){cell.classList.add('white');}else{cell.classList.add('black');} //set color
       cell.id = x+','+y;
       cell.onclick = function(){tileClicked(x,y)};
     }
   }
 }
 //- Piece Data:
-function Piece(points, img, row, column, side, id){
+function Piece(points, img, row, column, side, id){ //piece class
   /*main pieces will only have the points, img, and movement parameters
   omitting the last 3 parameters for the main pieces will not ruin anything and will keep the location and side undefined
   use all parameters to make a really custom specific piece*/
@@ -86,6 +86,15 @@ Queen.prototype = Object.create(Queen.prototype); //base prototype off of Piece
 Queen.prototype.constructor = Queen; //make constructor
 Queen.prototype.checkMove = function(){ //move check
   let available = new Array(); //array of possible moves
+  /*  this.column -> current x position from 0-7
+      this.row -> current y position from 0-7
+      tiles -> 2d array of all tiles
+
+      how to check if theres a piece in a specific location:
+      tiles[column][row].piece will be undefined if theres no piece & hold a piece if there is
+
+      if in doubt, check the checkMove function in King class
+  */
   return available;
 }
 

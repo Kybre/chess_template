@@ -35,133 +35,130 @@ function makeBoard(){
   }
 }
 //- Piece Data:
-function piece(points, img, movement, row, column, side){
+function Piece(points, img, row, column, side, id){
   /*main pieces will only have the points, img, and movement parameters
   omitting the last 3 parameters for the main pieces will not ruin anything and will keep the location and side undefined
   use all parameters to make a really custom specific piece*/
-  return{
-    points: points,
-    img: img,
-    checkMove: movement,
-    row: row,
-    column: column,
-    side: side,
-    visible: true,
-  }
+  this.points = points;
+  this.img = img;
+  this.row = row;
+  this.column = column;
+  this.side = side;
+  this.id = id;
+  this.visible = true;
 }
-function king(column, row, side){
+
+function King(column, row, side){ //create king class
   let img = new Image();
   img.src = 'images/'+side+'k.png';
-  let k = piece(100,img,
-    function(newRow, newColumn){ //move check
-      console.log(tiles[0][0].piece)
-        column = newColumn;
-        row = newRow;
-        let available = new Array();
-        for(let i = -1; i <= 1; i++){
-          for(let j = -1; j <= 1; j++){
-            let c = column + i;
-            let r = row + j;
-
-            if (i != 0 || j != 0){
-              try{
-                let piece = tiles[c][r].piece;
-                console.log(piece);
-                if (piece == undefined){
-                  available.push([c,r]);
-                }else{
-                }
-              }catch(e){}
-            }
-          }
-        }
-      return available;
-      }, row, column, side);
-  return k;
+  Piece.call(this, 0, img, row, column, side, 'k'); //inherit from Piece
 }
-function queen(column, row, side){
+King.prototype = Object.create(Piece.prototype); //base prototype off of Piece
+King.prototype.constructor = King; //make constructor
+King.prototype.checkMove = function(){ //move check
+    let available = new Array(); //array of possible moves
+    for(let y = -1; y <= 1; y++){
+      for(let x = -1; x <= 1; x++){
+        let c = this.column + y;
+        let r = this.row + x;
+
+        if (y != 0 || x != 0){
+          try{
+            let piece = tiles[c][r].piece;
+            if (piece == undefined){
+              available.push([c,r]);
+            }else{
+              console.log(piece);
+            }
+          }catch(e){/*checking outside of board*/}
+        }
+      }
+    }
+  return available;
+}
+
+function Queen(column, row, side){ //create queen class
   let img = new Image();
   img.src = 'images/'+side+'q.png';
-  let q = piece(9, img,
-    function(newRow, newColumn){ //move check
-      if(newRow == row && newColumn == column){return false;} //make sure new position is different
-
-      if(newRow == row || newColumn == column){return true;}//x y check
-
-      let distX = Math.abs(newRow-row);
-      let distY = Math.abs(newColumn-column); //diagonal check
-      if(distY == distX){return true;}
-      return false;
-    }, row, column, side)
-  return q;
+  Piece.call(this, 9, img, row, column, side, 'q'); //inherit from Piece
 }
-function rook(column, row, side){
+Queen.prototype = Object.create(Queen.prototype); //base prototype off of Piece
+Queen.prototype.constructor = Queen; //make constructor
+Queen.prototype.checkMove = function(){ //move check
+  let available = new Array(); //array of possible moves
+  return available;
+}
+
+function Rook(column, row, side){ //create rook class
   let img = new Image();
   img.src = 'images/'+side+'r.png';
-  let r = piece(5, img,
-    function(newRow, newColumn){ //move check
-      if(newRow == row && newColumn == column){return false;} //make sure new position is different
-      if(newRow == row || newColumn == column){return true;}//x y check
-      return false;
-    }, row, column, side)
-  return r;
+  Piece.call(this, 5, img, row, column, side, 'r'); //inherit from Piece
 }
-function knight(column, row, side){
+Rook.prototype = Object.create(Rook.prototype); //base prototype off of Piece
+Rook.prototype.constructor = Rook; //make constructor
+Rook.prototype.checkMove = function(){ //move check
+  let available = new Array(); //array of possible moves
+  return available;
+}
+
+function Knight(column, row, side){ //create knight class
   let img = new Image();
   img.src = 'images/'+side+'n.png';
-  let kn = piece(5, img,
-    function(newRow, newColumn){ //move check
-      let distX = Math.abs(newRow-row);
-      let distY = Math.abs(newColumn-column);
-      if((distX == 1 && distY == 2)||(distX == 2 && distY == 1)){ //2 steps 1 way, 1 step the other
-        return true;
-      }
-      return false;
-    }, row, column, side);
-  return kn;
+  Piece.call(this, 3, img, row, column, side, 'n'); //inherit from Piece
 }
-function bishop(column, row, side){
+Knight.prototype = Object.create(Knight.prototype); //base prototype off of Piece
+Knight.prototype.constructor = Knight; //make constructor
+Knight.prototype.checkMove = function(){ //move check
+  let available = new Array(); //array of possible moves
+  return available;
+}
+
+function Bishop(column, row, side){ //create bishop class
   let img = new Image();
   img.src = 'images/'+side+'b.png';
-  let b = piece(5, img,
-    function(newRow, newColumn){ //move check
-      if(newRow == row && newColumn == column){return false;} //make sure new position is different
-
-      let distX = Math.abs(newRow-row);
-      let distY = Math.abs(newColumn-column); //diagonal check
-      if(distY == distX){return true;}
-      return false;
-    }, row, column, side);
-  return b;
+  Piece.call(this, 3, img, row, column, side, 'b'); //inherit from Piece
 }
-function pawn(column, row, side){
+Bishop.prototype = Object.create(Bishop.prototype); //base prototype off of Piece
+Bishop.prototype.constructor = Bishop; //make constructor
+Bishop.prototype.checkMove = function(){ //move check
+  let available = new Array(); //array of possible moves
+  return available;
+}
+
+function Pawn(column, row, side){ //create pawn class
   let img = new Image();
   img.src = 'images/'+side+'p.png';
-  let p = piece(5, img,function(newRow, newColumn){return false}, row, column, side);
-  return p;
+  Piece.call(this, 1, img, row, column, side, 'p'); //inherit from Piece
+}
+Pawn.prototype = Object.create(Pawn.prototype); //base prototype off of Piece
+Pawn.prototype.constructor = Pawn; //make constructor
+Pawn.prototype.checkMove = function(){ //move check
+  let available = new Array(); //array of possible moves
+  return available;
 }
 
 function defaultBoardInit(){
   pieces = new Array(); //array that holds all active pieces
-  wk = king(3, 0, "b"); pieces.push(wk);
-  wq = queen(4, 0, "b"); pieces.push(wq);
-  wr1 = rook(0, 0, "b"); pieces.push(wr1);
-  wr2 = rook(7, 0, "b"); pieces.push(wr2);
-  wn1 = knight(1, 0, "b"); pieces.push(wn1);
-  wn2 = knight(6, 0, "b"); pieces.push(wn2);
-  wb1 = bishop(2, 0, "b"); pieces.push(wb1);
-  wb2 = bishop(5, 0, "b"); pieces.push(wb2);
+  wk = new King(3, 0, "w"); pieces.push(wk);
+  wq = new Queen(4, 0, "w"); pieces.push(wq);
+  wr1 = new Rook(0, 0, "w"); pieces.push(wr1);
+  wr2 = new Rook(7, 0, "w"); pieces.push(wr2);
+  wn1 = new Knight(1, 0, "w"); pieces.push(wn1);
+  wn2 = new Knight(6, 0, "w"); pieces.push(wn2);
+  wb1 = new Bishop(2, 0, "w"); pieces.push(wb1);
+  wb2 = new Bishop(5, 0, "w"); pieces.push(wb2);
 
-  bk = king(4, 7, "w"); pieces.push(bk);
-  bq = queen(3, 7, "w"); pieces.push(bq);
-  br1 = rook(7, 7, "w"); pieces.push(br1);
-  br2 = rook(0, 7, "w"); pieces.push(br2);
-  bn1 = knight(6, 7, "w"); pieces.push(bn1);
-  bn2 = knight(1, 7, "w"); pieces.push(bn2);
-  bb1 = bishop(5, 7, "w"); pieces.push(bb1);
-  bb2 = bishop(2, 7, "w"); pieces.push(bb2);
+  bk = new King(4, 7, "b"); pieces.push(bk);
+  bq = new Queen(3, 7, "b"); pieces.push(bq);
+  br1 = new Rook(7, 7, "b"); pieces.push(br1);
+  br2 = new Rook(0, 7, "b"); pieces.push(br2);
+  bn1 = new Knight(6, 7, "b"); pieces.push(bn1);
+  bn2 = new Knight(1, 7, "b"); pieces.push(bn2);
+  bb1 = new Bishop(5, 7, "b"); pieces.push(bb1);
+  bb2 = new Bishop(2, 7, "b"); pieces.push(bb2);
 
 }
+
 function replaceImages(){
   for(let i = 0; i < pieces.length; i++){
     tiles[pieces[i].column][pieces[i].row].piece = pieces[i]; //add the piece to the tile object
@@ -185,8 +182,8 @@ function movePiece(piece, newX, newY){
   piece.row = newY;
   piece.column = newX; //set position of piece
 }
+
 function tileClicked(x,y){
-  console.log(wk.checkMove(wk.column, wk.row));
   let tile = tiles[x][y];
   if (holdingPiece == undefined){ //true if a piece hasn't already been selected
     if (tile.piece != undefined){ // make sure theres a piece on the tile
@@ -199,6 +196,21 @@ function tileClicked(x,y){
     holdingPiece = undefined; //stop holding piece
   }
   replaceImages();
+}
+
+function asciiPrint(){ //terrible formatting, gotta learn how to ascii
+  console.log('-abcdefg');
+  for(let y = 0; y < 8; y++){
+    let str = y+1;
+    for(let x = 0; x < 8; x++){
+      if(tiles[x][y].piece != undefined){
+        str += tiles[x][y].piece.id;
+      }else{
+        str += '-';
+      }
+    }
+    console.log(str);
+  }
 }
 
 window.onload = function(){

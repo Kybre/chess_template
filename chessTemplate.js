@@ -1,17 +1,17 @@
 //Board:
-var boardSize = 8;
-var tileSize = 50; //in pixels
+let BOARD_SIZE = 8;
 let pieces = new Array(); //list of all pieces
 
-let wk, wq, wr1, wr2, wn1, wn2, wb1, wb2;// vars for white pieces
+let wk, wq, wr1, wr2, wn1, wn2, wb1, wb2;// vars for white pieces, wp1-8 are added in defaultBoardInit
 
-let bk, bq, br1, br2, bn1, bn2, bb1, bb2;// vars for black pieces
+let bk, bq, br1, br2, bn1, bn2, bb1, bb2;// vars for black pieces, wp1-8 are added in defaultBoardInit
 
-let holdingPiece = undefined;
+let holdingPiece;
+let highlightedCells = new Array();
 
-var tiles = new Array(boardSize);
+var tiles = new Array(BOARD_SIZE);
 for(let i = 0; i < tiles.length; i++){
-  tiles[i] = new Array(boardSize);
+  tiles[i] = new Array(BOARD_SIZE);
   for(let j = 0; j < tiles[i].length; j++){
     tiles[i][j] = {
       cell: undefined,
@@ -23,9 +23,9 @@ for(let i = 0; i < tiles.length; i++){
 //- Display
 function makeBoard(){
   let boardTable = document.getElementById("board"); //currently empty table
-  for(let y = 0; y < boardSize; y++){
+  for(let y = 0; y < BOARD_SIZE; y++){
     let row = boardTable.insertRow(y); //create row in table
-    for(let x = 0; x < boardSize; x++){
+    for(let x = 0; x < BOARD_SIZE; x++){
       let cell = row.insertCell(x); //add cells to row
       tiles[x][y].cell = cell;
       if(x%2 == y%2){cell.classList.add('white');}else{cell.classList.add('black');} //set color
@@ -48,6 +48,32 @@ function Piece(points, img, row, column, side, id){ //piece class
   this.visible = true;
 }
 
+function checkDirection(p, dx, dy, max){ //max optional value for maximum range
+  let available = new Array();
+  for(let d = -1; d <= 1; d += 2){ //positive and negative 1 direction
+    let r = p.row + dy * d;
+    let c = p.column + dx * d;
+
+    //cycle through all tiles in one direction
+    let i = 0;
+    while(r < BOARD_SIZE && r >= 0 && c < BOARD_SIZE && c >= 0 && !(i >= max)){
+      let piece = tiles[c][r].piece;
+      if (piece == undefined){
+        available.push([c,r]);
+      }else{
+        if(piece.side != p.side){
+          available.push([c,r]);
+        }
+        break;
+      }
+      r += dy*d;
+      c += dx*d;
+      i++;
+    }
+  }
+  return available;
+}
+
 function King(column, row, side){ //create king class
   let img = new Image();
   img.src = 'images/'+side+'k.png';
@@ -57,23 +83,13 @@ King.prototype = Object.create(Piece.prototype); //base prototype off of Piece
 King.prototype.constructor = King; //make constructor
 King.prototype.checkMove = function(){ //move check
     let available = new Array(); //array of possible moves
-    for(let y = -1; y <= 1; y++){
-      for(let x = -1; x <= 1; x++){
-        let c = this.column + y;
-        let r = this.row + x;
 
-        if (y != 0 || x != 0){
-          try{
-            let piece = tiles[c][r].piece;
-            if (piece == undefined){
-              available.push([c,r]);
-            }else{
-              console.log(piece);
-            }
-          }catch(e){/*checking outside of board*/}
-        }
-      }
-    }
+    available.pushArray(checkDirection(this, 0,1, 1)); //vertical check, max distance = 1
+    available.pushArray(checkDirection(this, 1,0, 1)); //horizontal check, max distance = 1
+
+    available.pushArray(checkDirection(this, 1,1, 1)); //diagonal down, max distance = 1
+    available.pushArray(checkDirection(this, 1,-1, 1)); //diagonal up, max distance = 1
+
   return available;
 }
 
@@ -86,15 +102,13 @@ Queen.prototype = Object.create(Queen.prototype); //base prototype off of Piece
 Queen.prototype.constructor = Queen; //make constructor
 Queen.prototype.checkMove = function(){ //move check
   let available = new Array(); //array of possible moves
-  /*  this.column -> current x position from 0-7
-      this.row -> current y position from 0-7
-      tiles -> 2d array of all tiles
 
-      how to check if theres a piece in a specific location:
-      tiles[column][row].piece will be undefined if theres no piece & hold a piece if there is
+  available.pushArray(checkDirection(this, 0,1)); //vertical check
+  available.pushArray(checkDirection(this, 1,0)); //horizontal check
 
-      if in doubt, check the checkMove function in King class
-  */
+  available.pushArray(checkDirection(this, 1,1)); //diagonal down
+  available.pushArray(checkDirection(this, 1,-1)); //diagonal up
+
   return available;
 }
 
@@ -107,6 +121,10 @@ Rook.prototype = Object.create(Rook.prototype); //base prototype off of Piece
 Rook.prototype.constructor = Rook; //make constructor
 Rook.prototype.checkMove = function(){ //move check
   let available = new Array(); //array of possible moves
+
+  available.pushArray(checkDirection(this, 0,1)); //vertical check
+  available.pushArray(checkDirection(this, 1,0)); //horizontal check
+
   return available;
 }
 
@@ -119,6 +137,12 @@ Knight.prototype = Object.create(Knight.prototype); //base prototype off of Piec
 Knight.prototype.constructor = Knight; //make constructor
 Knight.prototype.checkMove = function(){ //move check
   let available = new Array(); //array of possible moves
+
+  available.pushArray(checkDirection(this, 1,2, 1));
+  available.pushArray(checkDirection(this, 2,1, 1));
+  available.pushArray(checkDirection(this, 1,-2, 1));
+  available.pushArray(checkDirection(this, 2,-1, 1));
+
   return available;
 }
 
@@ -131,6 +155,10 @@ Bishop.prototype = Object.create(Bishop.prototype); //base prototype off of Piec
 Bishop.prototype.constructor = Bishop; //make constructor
 Bishop.prototype.checkMove = function(){ //move check
   let available = new Array(); //array of possible moves
+
+  available.pushArray(checkDirection(this, 1,1)); //diagonal down
+  available.pushArray(checkDirection(this, 1,-1)); //diagonal up
+
   return available;
 }
 
@@ -141,8 +169,31 @@ function Pawn(column, row, side){ //create pawn class
 }
 Pawn.prototype = Object.create(Pawn.prototype); //base prototype off of Piece
 Pawn.prototype.constructor = Pawn; //make constructor
+Pawn.prototype.hasMoved = false;
+Pawn.prototype.isAtEnd = false;
 Pawn.prototype.checkMove = function(){ //move check
   let available = new Array(); //array of possible moves
+  let direction = 1;if(this.side == 'b'){direction = -1};
+
+  let r = this.row+direction;
+  let c = this.column
+  if(r >= 0 && r < BOARD_SIZE){
+    if(tiles[c][r].piece == undefined){available.push([c,r])}//check front
+
+    for(let d = -1; d <= 1; d += 2){ //positive and negative 1 direction
+      c = this.column+d;
+      try{
+        if(tiles[c][r].piece.side != this.side){available.push([c,r])}
+      }catch(e){}
+    }
+  }else{this.isAtEnd = true;}
+
+  if(this.hasMoved == false){
+    r += direction;
+    c = this.column
+    if(tiles[c][r].piece == undefined){available.push([c,r])}
+  }
+
   return available;
 }
 
@@ -156,6 +207,9 @@ function defaultBoardInit(){
   wn2 = new Knight(6, 0, "w"); pieces.push(wn2);
   wb1 = new Bishop(2, 0, "w"); pieces.push(wb1);
   wb2 = new Bishop(5, 0, "w"); pieces.push(wb2);
+  for(let i = 0; i < BOARD_SIZE; i++){
+    window['wp' + (i+1)] = new Pawn(i, 1, "w"); pieces.push(window['wp' + (i+1)]);
+  }
 
   bk = new King(4, 7, "b"); pieces.push(bk);
   bq = new Queen(3, 7, "b"); pieces.push(bq);
@@ -165,6 +219,9 @@ function defaultBoardInit(){
   bn2 = new Knight(1, 7, "b"); pieces.push(bn2);
   bb1 = new Bishop(5, 7, "b"); pieces.push(bb1);
   bb2 = new Bishop(2, 7, "b"); pieces.push(bb2);
+  for(let i = 0; i < BOARD_SIZE; i++){
+    window['bp' + (i+1)] = new Pawn(i, 6, "b"); pieces.push(window['bp' + (i+1)]);
+  }
 
 }
 
@@ -197,11 +254,18 @@ function tileClicked(x,y){
   if (holdingPiece == undefined){ //true if a piece hasn't already been selected
     if (tile.piece != undefined){ // make sure theres a piece on the tile
       holdingPiece = tile.piece;//store hold piece
-      holdingPiece.visible = false;
+      highlightedCells = holdingPiece.checkMove();
+      for(let i = 0; i < highlightedCells.length; i++){
+        tiles[highlightedCells[i][0]][highlightedCells[i][1]].cell.classList.add('highlight');
+      }
     }
   }else{
     movePiece(holdingPiece, x,y); //move piece to desired location if a piece is being held
+    if(holdingPiece.constructor.name == "Pawn"){holdingPiece.hasMoved = true}
     tile.piece.visible = true; //make piece in new location visible
+    for(let i = 0; i < highlightedCells.length; i++){
+      tiles[highlightedCells[i][0]][highlightedCells[i][1]].cell.classList.remove('highlight');
+    }
     holdingPiece = undefined; //stop holding piece
   }
   replaceImages();
@@ -209,9 +273,9 @@ function tileClicked(x,y){
 
 function asciiPrint(){ //terrible formatting, gotta learn how to ascii
   console.log('-abcdefg');
-  for(let y = 0; y < 8; y++){
+  for(let y = 0; y < BOARD_SIZE; y++){
     let str = y+1;
-    for(let x = 0; x < 8; x++){
+    for(let x = 0; x < BOARD_SIZE; x++){
       if(tiles[x][y].piece != undefined){
         str += tiles[x][y].piece.id;
       }else{
@@ -228,6 +292,10 @@ window.onload = function(){
 
   replaceImages();
 }
+
+Array.prototype.pushArray = function(arr) {
+    this.push.apply(this, arr);
+};
 
 /*
 

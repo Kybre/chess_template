@@ -43,6 +43,9 @@ td:hover{
 .white{
   background-color: beige;
 }
+.highlight{
+  background-color: LightGreen;
+}
 img {
   min-width: 70%;
   max-width: 100%;

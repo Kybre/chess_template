@@ -6,6 +6,8 @@ let wk, wq, wr1, wr2, wn1, wn2, wb1, wb2;// vars for white pieces, wp1-8 are add
 
 let bk, bq, br1, br2, bn1, bn2, bb1, bb2;// vars for black pieces, wp1-8 are added in defaultBoardInit
 
+let turns = 0;
+
 let holdingPiece;
 let highlightedCells = new Array();
 
@@ -243,30 +245,53 @@ function movePiece(piece, newX, newY){
   let oldY = piece.row;
 
   tiles[piece.column][piece.row].piece = undefined; //get rid of old piece
+  if(tiles[newX][newY].piece != undefined){
+    pieces.splice(pieces.indexOf(tiles[newX][newY].piece), 1);
+  }
   tiles[newX][newY].piece = piece; //add piece in new location
 
   piece.row = newY;
   piece.column = newX; //set position of piece
+
+  if(piece.constructor.name == "Pawn"){piece.hasMoved = true}
+}
+function holdPiece(piece){
+  highlightedCells = holdingPiece.checkMove();//possible moves
+  if(highlightedCells.length != 0){
+    //tile.piece.visible = false
+    for(let i = 0; i < highlightedCells.length; i++){
+      tiles[highlightedCells[i][0]][highlightedCells[i][1]].cell.classList.add('highlight');
+    }
+  }else{ //make nothing happen if there are no possible moves
+    holdingPiece = undefined;
+  }
+}
+function removeHighlights(){
+  for(let i = 0; i < highlightedCells.length; i++){
+    tiles[highlightedCells[i][0]][highlightedCells[i][1]].cell.classList.remove('highlight');
+  }
 }
 
 function tileClicked(x,y){
   let tile = tiles[x][y];
   if (holdingPiece == undefined){ //true if a piece hasn't already been selected
     if (tile.piece != undefined){ // make sure theres a piece on the tile
-      holdingPiece = tile.piece;//store hold piece
-      highlightedCells = holdingPiece.checkMove();
-      for(let i = 0; i < highlightedCells.length; i++){
-        tiles[highlightedCells[i][0]][highlightedCells[i][1]].cell.classList.add('highlight');
+      if ((tile.piece.side == 'b' && turns%2 == 1)||(tile.piece.side == 'w' && turns%2 == 0)){ //make sure of correct turn
+        holdingPiece = tile.piece;//store hold piece
+        holdPiece(holdingPiece);
       }
     }
   }else{
-    movePiece(holdingPiece, x,y); //move piece to desired location if a piece is being held
-    if(holdingPiece.constructor.name == "Pawn"){holdingPiece.hasMoved = true}
-    tile.piece.visible = true; //make piece in new location visible
-    for(let i = 0; i < highlightedCells.length; i++){
-      tiles[highlightedCells[i][0]][highlightedCells[i][1]].cell.classList.remove('highlight');
+    if(highlightedCells.containsCoordinate(x,y)){ //make sure of new location
+      turns++;
+      movePiece(holdingPiece, x,y); //move piece to desired location if a piece is being held
+      removeHighlights();
+      holdingPiece = undefined; //stop holding piece
+      //tile.piece.visible = true; //make piece in new location visible
+    }else if (holdingPiece.column == x && holdingPiece.row == y){
+      removeHighlights();
+      holdingPiece = undefined; //stop holding piece
     }
-    holdingPiece = undefined; //stop holding piece
   }
   replaceImages();
 }
@@ -296,6 +321,15 @@ window.onload = function(){
 Array.prototype.pushArray = function(arr) {
     this.push.apply(this, arr);
 };
+
+Array.prototype.containsCoordinate = function(x,y){
+  for(let i = 0; i < this.length; i++){
+    try{
+      if(this[i][0] == x && this[i][1] == y){return true}
+    }catch(e){}
+  }
+  return false;
+}
 
 /*
 

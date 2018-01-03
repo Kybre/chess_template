@@ -2,9 +2,14 @@
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -khtml-user-select: none;
+  -webkit-user-drag: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+  user-drag: none;
+}
+body {
+  background-color: #cccccc;
 }
 
 canvas {
@@ -15,7 +20,6 @@ td{
   border: 0.5vmin solid black;
   border-color: transparent;
   white-space: nowrap;
-  padding: 0px;
   overflow: hidden;
 
   width:10vmin;
@@ -26,7 +30,6 @@ td{
 }
 table{
   border: 0.5vmin solid black;
-
   border-spacing: 0px;
 
   position: absolute;

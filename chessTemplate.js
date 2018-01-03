@@ -180,7 +180,12 @@ Pawn.prototype.checkMove = function(){ //move check
   let r = this.row+direction;
   let c = this.column
   if(r >= 0 && r < BOARD_SIZE){
-    if(tiles[c][r].piece == undefined){available.push([c,r])}//check front
+    if(tiles[c][r].piece == undefined){
+      available.push([c,r])
+      r += direction;
+      if(tiles[c][r].piece == undefined){available.push([c,r])}
+      r -= direction;
+    }
 
     for(let d = -1; d <= 1; d += 2){ //positive and negative 1 direction
       c = this.column+d;
@@ -189,12 +194,6 @@ Pawn.prototype.checkMove = function(){ //move check
       }catch(e){}
     }
   }else{this.isAtEnd = true;}
-
-  if(this.hasMoved == false){
-    r += direction;
-    c = this.column
-    if(tiles[c][r].piece == undefined){available.push([c,r])}
-  }
 
   return available;
 }
@@ -225,6 +224,7 @@ function defaultBoardInit(){
     window['bp' + (i+1)] = new Pawn(i, 6, "b"); pieces.push(window['bp' + (i+1)]);
   }
 
+  turns = 0;
 }
 
 function replaceImages(){
@@ -266,31 +266,48 @@ function holdPiece(piece){
     holdingPiece = undefined;
   }
 }
+
+function checkPiece(piece){
+  if ((piece.side == 'b' && turns%2 == 1)||(piece.side == 'w' && turns%2 == 0)){ //make sure of correct turn
+    holdingPiece = piece;//store hold piece
+    holdPiece(holdingPiece);
+  }
+}
+
 function removeHighlights(){
   for(let i = 0; i < highlightedCells.length; i++){
     tiles[highlightedCells[i][0]][highlightedCells[i][1]].cell.classList.remove('highlight');
   }
 }
-
 function tileClicked(x,y){
   let tile = tiles[x][y];
+
+  let isSameColor = false;
+  if(tile.piece != undefined && holdingPiece != undefined){if(tile.piece.side == holdingPiece.side){isSameColor = true}}
+
+  let isSamePiece = false;
+  if(isSameColor){if(holdingPiece == tile.piece){isSamePiece = true}}
+
   if (holdingPiece == undefined){ //true if a piece hasn't already been selected
     if (tile.piece != undefined){ // make sure theres a piece on the tile
-      if ((tile.piece.side == 'b' && turns%2 == 1)||(tile.piece.side == 'w' && turns%2 == 0)){ //make sure of correct turn
-        holdingPiece = tile.piece;//store hold piece
-        holdPiece(holdingPiece);
-      }
+      checkPiece(tile.piece);
     }
   }else{
-    if(highlightedCells.containsCoordinate(x,y)){ //make sure of new location
-      turns++;
-      movePiece(holdingPiece, x,y); //move piece to desired location if a piece is being held
+    if(isSameColor){
       removeHighlights();
-      holdingPiece = undefined; //stop holding piece
-      //tile.piece.visible = true; //make piece in new location visible
-    }else if (holdingPiece.column == x && holdingPiece.row == y){
-      removeHighlights();
-      holdingPiece = undefined; //stop holding piece
+      if(isSamePiece){
+        holdingPiece = undefined; //stop holding piece
+      }else{
+        checkPiece(tile.piece);
+      }
+    }else{
+      if(highlightedCells.containsCoordinate(x,y)){ //make sure of new location
+        removeHighlights();
+        movePiece(holdingPiece, x,y); //move piece to desired location if a piece is being held
+        holdingPiece = undefined; //stop holding piece
+        //tile.piece.visible = true; //make piece in new location visible
+        turns++;
+      }
     }
   }
   replaceImages();

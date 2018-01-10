@@ -58,7 +58,7 @@ function Piece(points, img, row, column, side, id){ //piece class
 
   this.visible = true;
   this.colors = [0,1,2,3,4,5];
-  // for(let i = 0; i < 2; i++){
+  for(let i = 0; i < 3; i++){
     this.colors.splice(Math.floor(Math.random()*this.colors.length),1);
   }
 

@@ -11,6 +11,14 @@ let turns = 0;
 let holdingPiece;
 let highlightedCells = new Array();
 
+let colors = new Array();
+let RED = 'hsl(0,80%, 60%)'; colors.push(RED);
+let YELLOW = 'hsl(60,80%, 60%)'; colors.push(YELLOW);
+let GREEN = 'hsl(120,80%, 60%)'; colors.push(GREEN);
+let LIGHT_BLUE = 'hsl(180,80%, 60%)'; colors.push(LIGHT_BLUE);
+let DARK_BLUE = 'hsl(240,80%, 60%)'; colors.push(DARK_BLUE);
+let PINK = 'hsl(300,80%, 60%)'; colors.push(PINK);
+
 var tiles = new Array(BOARD_SIZE);
 for(let i = 0; i < tiles.length; i++){
   tiles[i] = new Array(BOARD_SIZE);
@@ -47,7 +55,13 @@ function Piece(points, img, row, column, side, id){ //piece class
   this.column = column;
   this.side = side;
   this.id = id;
+
   this.visible = true;
+  this.colors = [0,1,2,3,4,5];
+  // for(let i = 0; i < 2; i++){
+    this.colors.splice(Math.floor(Math.random()*this.colors.length),1);
+  }
+
 }
 
 function checkDirection(p, dx, dy, max){ //max optional value for maximum range
@@ -80,6 +94,7 @@ function King(column, row, side){ //create king class
   let img = new Image();
   img.src = 'images/'+side+'k.png';
   Piece.call(this, 0, img, row, column, side, 'k'); //inherit from Piece
+  this.colors = new Array(); //remove colors from king
 }
 King.prototype = Object.create(Piece.prototype); //base prototype off of Piece
 King.prototype.constructor = King; //make constructor
@@ -228,6 +243,8 @@ function defaultBoardInit(){
 }
 
 function replaceImages(){
+  let circles = document.getElementsByTagName("span"), index;
+
   for(let i = 0; i < pieces.length; i++){
     tiles[pieces[i].column][pieces[i].row].piece = pieces[i]; //add the piece to the tile object
     let tile = tiles[pieces[i].column][pieces[i].row].cell; //html element
@@ -237,6 +254,13 @@ function replaceImages(){
     }
     if(tiles[pieces[i].column][pieces[i].row].piece.visible == true){
       tile.appendChild(pieces[i].img); //add the current piece image to the tile
+      tile.appendChild(document.createElement('BR'));
+      for(let j = 0; j < pieces[i].colors.length; j++){
+        let c = document.createElement('SPAN');
+        c.classList.add('circle');
+        c.style['background-color'] = colors[pieces[i].colors[j]];
+        tile.appendChild(c);
+      }
     }
   }
 }
@@ -245,6 +269,7 @@ function movePiece(piece, newX, newY){
   let oldY = piece.row;
 
   tiles[piece.column][piece.row].piece = undefined; //get rid of old piece
+
   if(tiles[newX][newY].piece != undefined){
     pieces.splice(pieces.indexOf(tiles[newX][newY].piece), 1);
   }
@@ -252,6 +277,10 @@ function movePiece(piece, newX, newY){
 
   piece.row = newY;
   piece.column = newX; //set position of piece
+
+  while(tiles[oldX][oldY].cell.hasChildNodes()){ //get rid of circles
+    tiles[oldX][oldY].cell.removeChild(tiles[oldX][oldY].cell.lastChild);
+  }
 
   if(piece.constructor.name == "Pawn"){piece.hasMoved = true}
 }

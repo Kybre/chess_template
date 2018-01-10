@@ -49,6 +49,16 @@ td:hover{
 .highlight{
   background-color: LightGreen;
 }
+
+.circle {
+  height: 2vmin;
+  width: 2vmin;
+  background-color: hsl(0,100%,50%);
+  border-radius: 50%;
+  border: 0.1vmin solid black;
+  display: inline-block;
+}
+
 img {
   min-width: 70%;
   max-width: 100%;

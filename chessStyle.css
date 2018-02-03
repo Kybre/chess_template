@@ -15,7 +15,6 @@ body {
 canvas {
   background: #eee; display: block; margin: 0 auto;
 }
-
 td{
   border: 0.5vmin solid black;
   border-color: transparent;
@@ -31,14 +30,34 @@ td{
 table{
   border: 0.5vmin solid black;
   border-spacing: 0px;
+  margin: 2vmin;
 
-  position: absolute;
+  /*position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);*/
 }
 td:hover{
   border: 0.5vmin solid black;
+}
+
+.overlay{
+  background-color: red;
+}
+#game{
+  display: none;
+}
+.flex-container {
+  background-color: #afaaaa;
+  display: flex;
+  justify-content: center;
+}
+.sidebar{
+  margin: 2vmin;
+  border: 0.5vmin solid black;
+  background-color: beige;
+  flex-grow:1;
+  height: 87.5vmin;
 }
 .black{
   background-color: peru;

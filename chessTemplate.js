@@ -7,17 +7,30 @@ let wk, wq, wr1, wr2, wn1, wn2, wb1, wb2;// vars for white pieces, wp1-8 are add
 let bk, bq, br1, br2, bn1, bn2, bb1, bb2;// vars for black pieces, wp1-8 are added in defaultBoardInit
 
 let turns = 0;
+let side = 'w';
 
 let holdingPiece;
 let highlightedCells = new Array();
 
-let colors = new Array();
-let RED = 'hsl(0,80%, 60%)'; colors.push(RED);
-let YELLOW = 'hsl(60,80%, 60%)'; colors.push(YELLOW);
-let GREEN = 'hsl(120,80%, 60%)'; colors.push(GREEN);
-let LIGHT_BLUE = 'hsl(180,80%, 60%)'; colors.push(LIGHT_BLUE);
-let DARK_BLUE = 'hsl(240,80%, 60%)'; colors.push(DARK_BLUE);
-let PINK = 'hsl(300,80%, 60%)'; colors.push(PINK);
+let colors = {
+  Red:'hsl(0,80%, 60%)',
+  Yellow:'hsl(60,80%, 60%)',
+  Green:'hsl(120,80%, 60%)',
+  'Light Blue':'hsl(180,80%, 60%)',
+  'Dark Blue':'hsl(240,80%, 60%)',
+  Pink:'hsl(300,80%, 60%)',
+  Grey:'hsl(0, 0%, 50%)'
+}
+function Player(side){
+  this.side = side;
+  this.hints = new Array();
+  this.points = 0;
+  this.keyHolder = undefined;
+}
+
+let whitePlayer = new Player('w');
+let blackPlayer = new Player('b');
+let players = [whitePlayer, blackPlayer];
 
 var tiles = new Array(BOARD_SIZE);
 for(let i = 0; i < tiles.length; i++){
@@ -44,174 +57,6 @@ function makeBoard(){
     }
   }
 }
-//- Piece Data:
-function Piece(points, img, row, column, side, id){ //piece class
-  /*main pieces will only have the points, img, and movement parameters
-  omitting the last 3 parameters for the main pieces will not ruin anything and will keep the location and side undefined
-  use all parameters to make a really custom specific piece*/
-  this.points = points;
-  this.img = img;
-  this.row = row;
-  this.column = column;
-  this.side = side;
-  this.id = id;
-
-  this.visible = true;
-  this.colors = [0,1,2,3,4,5];
-  for(let i = 0; i < 3; i++){
-    this.colors.splice(Math.floor(Math.random()*this.colors.length),1);
-  }
-
-}
-
-function checkDirection(p, dx, dy, max){ //max optional value for maximum range
-  let available = new Array();
-  for(let d = -1; d <= 1; d += 2){ //positive and negative 1 direction
-    let r = p.row + dy * d;
-    let c = p.column + dx * d;
-
-    //cycle through all tiles in one direction
-    let i = 0;
-    while(r < BOARD_SIZE && r >= 0 && c < BOARD_SIZE && c >= 0 && !(i >= max)){
-      let piece = tiles[c][r].piece;
-      if (piece == undefined){
-        available.push([c,r]);
-      }else{
-        if(piece.side != p.side){
-          available.push([c,r]);
-        }
-        break;
-      }
-      r += dy*d;
-      c += dx*d;
-      i++;
-    }
-  }
-  return available;
-}
-
-function King(column, row, side){ //create king class
-  let img = new Image();
-  img.src = 'images/'+side+'k.png';
-  Piece.call(this, 0, img, row, column, side, 'k'); //inherit from Piece
-  this.colors = new Array(); //remove colors from king
-}
-King.prototype = Object.create(Piece.prototype); //base prototype off of Piece
-King.prototype.constructor = King; //make constructor
-King.prototype.checkMove = function(){ //move check
-    let available = new Array(); //array of possible moves
-
-    available.pushArray(checkDirection(this, 0,1, 1)); //vertical check, max distance = 1
-    available.pushArray(checkDirection(this, 1,0, 1)); //horizontal check, max distance = 1
-
-    available.pushArray(checkDirection(this, 1,1, 1)); //diagonal down, max distance = 1
-    available.pushArray(checkDirection(this, 1,-1, 1)); //diagonal up, max distance = 1
-
-  return available;
-}
-
-function Queen(column, row, side){ //create queen class
-  let img = new Image();
-  img.src = 'images/'+side+'q.png';
-  Piece.call(this, 9, img, row, column, side, 'q'); //inherit from Piece
-}
-Queen.prototype = Object.create(Queen.prototype); //base prototype off of Piece
-Queen.prototype.constructor = Queen; //make constructor
-Queen.prototype.checkMove = function(){ //move check
-  let available = new Array(); //array of possible moves
-
-  available.pushArray(checkDirection(this, 0,1)); //vertical check
-  available.pushArray(checkDirection(this, 1,0)); //horizontal check
-
-  available.pushArray(checkDirection(this, 1,1)); //diagonal down
-  available.pushArray(checkDirection(this, 1,-1)); //diagonal up
-
-  return available;
-}
-
-function Rook(column, row, side){ //create rook class
-  let img = new Image();
-  img.src = 'images/'+side+'r.png';
-  Piece.call(this, 5, img, row, column, side, 'r'); //inherit from Piece
-}
-Rook.prototype = Object.create(Rook.prototype); //base prototype off of Piece
-Rook.prototype.constructor = Rook; //make constructor
-Rook.prototype.checkMove = function(){ //move check
-  let available = new Array(); //array of possible moves
-
-  available.pushArray(checkDirection(this, 0,1)); //vertical check
-  available.pushArray(checkDirection(this, 1,0)); //horizontal check
-
-  return available;
-}
-
-function Knight(column, row, side){ //create knight class
-  let img = new Image();
-  img.src = 'images/'+side+'n.png';
-  Piece.call(this, 3, img, row, column, side, 'n'); //inherit from Piece
-}
-Knight.prototype = Object.create(Knight.prototype); //base prototype off of Piece
-Knight.prototype.constructor = Knight; //make constructor
-Knight.prototype.checkMove = function(){ //move check
-  let available = new Array(); //array of possible moves
-
-  available.pushArray(checkDirection(this, 1,2, 1));
-  available.pushArray(checkDirection(this, 2,1, 1));
-  available.pushArray(checkDirection(this, 1,-2, 1));
-  available.pushArray(checkDirection(this, 2,-1, 1));
-
-  return available;
-}
-
-function Bishop(column, row, side){ //create bishop class
-  let img = new Image();
-  img.src = 'images/'+side+'b.png';
-  Piece.call(this, 3, img, row, column, side, 'b'); //inherit from Piece
-}
-Bishop.prototype = Object.create(Bishop.prototype); //base prototype off of Piece
-Bishop.prototype.constructor = Bishop; //make constructor
-Bishop.prototype.checkMove = function(){ //move check
-  let available = new Array(); //array of possible moves
-
-  available.pushArray(checkDirection(this, 1,1)); //diagonal down
-  available.pushArray(checkDirection(this, 1,-1)); //diagonal up
-
-  return available;
-}
-
-function Pawn(column, row, side){ //create pawn class
-  let img = new Image();
-  img.src = 'images/'+side+'p.png';
-  Piece.call(this, 1, img, row, column, side, 'p'); //inherit from Piece
-}
-Pawn.prototype = Object.create(Pawn.prototype); //base prototype off of Piece
-Pawn.prototype.constructor = Pawn; //make constructor
-Pawn.prototype.hasMoved = false;
-Pawn.prototype.isAtEnd = false;
-Pawn.prototype.checkMove = function(){ //move check
-  let available = new Array(); //array of possible moves
-  let direction = 1;if(this.side == 'b'){direction = -1};
-
-  let r = this.row+direction;
-  let c = this.column
-  if(r >= 0 && r < BOARD_SIZE){
-    if(tiles[c][r].piece == undefined){
-      available.push([c,r])
-      r += direction;
-      if(tiles[c][r].piece == undefined){available.push([c,r])}
-      r -= direction;
-    }
-
-    for(let d = -1; d <= 1; d += 2){ //positive and negative 1 direction
-      c = this.column+d;
-      try{
-        if(tiles[c][r].piece.side != this.side){available.push([c,r])}
-      }catch(e){}
-    }
-  }else{this.isAtEnd = true;}
-
-  return available;
-}
 
 function defaultBoardInit(){
   pieces = new Array(); //array that holds all active pieces
@@ -227,8 +72,8 @@ function defaultBoardInit(){
     window['wp' + (i+1)] = new Pawn(i, 1, "w"); pieces.push(window['wp' + (i+1)]);
   }
 
-  bk = new King(4, 7, "b"); pieces.push(bk);
-  bq = new Queen(3, 7, "b"); pieces.push(bq);
+  bk = new King(3, 7, "b"); pieces.push(bk);
+  bq = new Queen(4, 7, "b"); pieces.push(bq);
   br1 = new Rook(7, 7, "b"); pieces.push(br1);
   br2 = new Rook(0, 7, "b"); pieces.push(br2);
   bn1 = new Knight(6, 7, "b"); pieces.push(bn1);
@@ -271,7 +116,9 @@ function movePiece(piece, newX, newY){
   tiles[piece.column][piece.row].piece = undefined; //get rid of old piece
 
   if(tiles[newX][newY].piece != undefined){
-    pieces.splice(pieces.indexOf(tiles[newX][newY].piece), 1);
+    players[turns%2].points += tiles[newX][newY].piece.points; //add points to player
+    createHint((turns+1)%2); //create hint of colors of opposing player's keyholder
+    removePiece(tiles[newX][newY].piece);
   }
   tiles[newX][newY].piece = piece; //add piece in new location
 
@@ -283,6 +130,9 @@ function movePiece(piece, newX, newY){
   }
 
   if(piece.constructor.name == "Pawn"){piece.hasMoved = true}
+}
+function removePiece(piece){
+  pieces.splice(pieces.indexOf(piece), 1);
 }
 function holdPiece(piece){
   highlightedCells = holdingPiece.checkMove();//possible moves
@@ -297,7 +147,7 @@ function holdPiece(piece){
 }
 
 function checkPiece(piece){
-  if ((piece.side == 'b' && turns%2 == 1)||(piece.side == 'w' && turns%2 == 0)){ //make sure of correct turn
+  if (piece.side == side){ //make sure of correct turn
     holdingPiece = piece;//store hold piece
     holdPiece(holdingPiece);
   }
@@ -309,13 +159,30 @@ function removeHighlights(){
   }
 }
 function tileClicked(x,y){
+  if(turns%2 == 0){side = 'w'}else{side = 'b'}
+  if(turns < 2){
+    gameSetup(x,y);
+  }else{
+    inGameProcess(x,y);
+  }
+  replaceImages();
+}
+function gameSetup(x,y){
   let tile = tiles[x][y];
-
+  if(tile.piece != undefined){
+    if(tile.piece.side == side){
+      players[turns%2].keyHolder = tile.piece;
+      nextTurn();
+    }
+  }
+}
+function inGameProcess(x,y){
+  let tile = tiles[x][y];
   let isSameColor = false;
   if(tile.piece != undefined && holdingPiece != undefined){if(tile.piece.side == holdingPiece.side){isSameColor = true}}
 
   let isSamePiece = false;
-  if(isSameColor){if(holdingPiece == tile.piece){isSamePiece = true}}
+  if(isSameColor){isSamePiece = (holdingPiece == tile.piece)}
 
   if (holdingPiece == undefined){ //true if a piece hasn't already been selected
     if (tile.piece != undefined){ // make sure theres a piece on the tile
@@ -334,13 +201,25 @@ function tileClicked(x,y){
         removeHighlights();
         movePiece(holdingPiece, x,y); //move piece to desired location if a piece is being held
         holdingPiece = undefined; //stop holding piece
-        //tile.piece.visible = true; //make piece in new location visible
-        turns++;
+        nextTurn();
       }
     }
   }
-  replaceImages();
 }
+function nextTurn(){
+  turns++;
+  if(turns%2 == 0){
+    document.getElementById('log').innerHTML = 'white turn';
+  }else{
+    document.getElementById('log').innerHTML = 'black turn';
+  }
+  if(turns < 2){
+    document.getElementById('phase').innerHTML = 'pick key';
+  }else{
+    document.getElementById('phase').innerHTML = 'play game';
+  }
+}
+
 
 function asciiPrint(){ //terrible formatting, gotta learn how to ascii
   console.log('-abcdefg');
@@ -357,11 +236,20 @@ function asciiPrint(){ //terrible formatting, gotta learn how to ascii
   }
 }
 
+function createHint(side){
+  let rColor = players[side].keyHolder.colors[Math.floor(Math.random()*piece.colors.length)];
+  console.log(rColor);
+}
 window.onload = function(){
-  makeBoard();
-  defaultBoardInit();
+  document.getElementById('button').onclick = function(){
+    document.getElementById('startScreenOverlay').style.display = 'none';
+    document.getElementById('game').style.display = 'flex';
 
-  replaceImages();
+    makeBoard();
+    defaultBoardInit();
+
+    replaceImages();
+  }
 }
 
 Array.prototype.pushArray = function(arr) {
@@ -376,25 +264,3 @@ Array.prototype.containsCoordinate = function(x,y){
   }
   return false;
 }
-
-/*
-
-- Name
-- Movement Validity Setters
-- Pieces as Images with Collision
-- Piece Collision
-- (Ability)
-
-Piece Movement:
-- (Piece Animation)
-- Validity Getters
-
-Player Input:
-- Piece Selection
-- Piece Placements, Validity checks with indicators
-
-Indicicators of Movement:
-- (Indication Animation)
-- Validity Checks
-
-*/

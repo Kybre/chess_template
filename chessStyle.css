@@ -56,7 +56,7 @@ td:hover{
   margin: 2vmin;
   border: 0.5vmin solid black;
   background-color: beige;
-  flex-grow:1;
+  width: 20%;
   height: 87.5vmin;
 }
 .black{

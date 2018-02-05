@@ -47,20 +47,25 @@ function King(column, row, side){ //create king class
   let img = new Image();
   img.src = 'images/'+side+'k.png';
   Piece.call(this, 0, img, row, column, side, 'k'); //inherit from Piece
-  this.colors = this.colors = ['Grey']; //remove colors from king
+  this.colors = ['Grey']; //remove colors from king
 }
 King.prototype = Object.create(Piece.prototype); //base prototype off of Piece
 King.prototype.constructor = King; //make constructor
+King.prototype.isLocked = true;
 King.prototype.checkMove = function(){ //move check
-    let available = new Array(); //array of possible moves
-
+  let available = new Array(); //array of possible moves
+  if(!this.isLocked){
     available.pushArray(checkDirection(this, 0,1, 1)); //vertical check, max distance = 1
     available.pushArray(checkDirection(this, 1,0, 1)); //horizontal check, max distance = 1
 
     available.pushArray(checkDirection(this, 1,1, 1)); //diagonal down, max distance = 1
     available.pushArray(checkDirection(this, 1,-1, 1)); //diagonal up, max distance = 1
-
+  }
   return available;
+}
+King.prototype.unlock = function(){
+  this.isLocked = false;
+  this.colors = [];
 }
 
 function Queen(column, row, side){ //create queen class

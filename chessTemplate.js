@@ -26,13 +26,19 @@ function Player(side){
   this.hints = new Array();
   this.points = 0;
   this.keyHolder = undefined;
+  this.isLocked = true;
 }
 
 let whitePlayer = new Player('w');
 let blackPlayer = new Player('b');
 let players = [whitePlayer, blackPlayer];
 
-var tiles = new Array(BOARD_SIZE);
+function resetPlayers(){
+  whitePlayer = new Player('w');
+  blackPlayer = new Player('b');
+}
+
+let tiles = new Array(BOARD_SIZE);
 for(let i = 0; i < tiles.length; i++){
   tiles[i] = new Array(BOARD_SIZE);
   for(let j = 0; j < tiles[i].length; j++){
@@ -42,7 +48,17 @@ for(let i = 0; i < tiles.length; i++){
     }
   }
 } //2d array of length boardSize for holding the tile and piece in each position
-
+function resetTiles(){
+  for(let i = 0; i < tiles.length; i++){
+    for(let j = 0; j < tiles[i].length; j++){
+      tiles[i][j].piece = undefined;
+      //tiles[i][j].cell.
+      while(tiles[i][j].cell.hasChildNodes()){ //remove images
+        tiles[i][j].cell.removeChild(tiles[i][j].cell.lastChild);
+      }
+    }
+  } //2d array of length boardSize for holding the tile and piece in each position
+}
 //- Display
 function makeBoard(){
   let boardTable = document.getElementById("board"); //currently empty table
@@ -59,6 +75,9 @@ function makeBoard(){
 }
 
 function defaultBoardInit(){
+  resetTiles();
+  resetPlayers();
+  
   pieces = new Array(); //array that holds all active pieces
   wk = new King(3, 0, "w"); pieces.push(wk);
   wq = new Queen(4, 0, "w"); pieces.push(wq);
@@ -85,10 +104,11 @@ function defaultBoardInit(){
   }
 
   turns = 0;
+  replaceImages();
 }
 
 function replaceImages(){
-  let circles = document.getElementsByTagName("span"), index;
+  //let circles = document.getElementsByTagName("span"), index;
 
   for(let i = 0; i < pieces.length; i++){
     tiles[pieces[i].column][pieces[i].row].piece = pieces[i]; //add the piece to the tile object
@@ -117,7 +137,12 @@ function movePiece(piece, newX, newY){
 
   if(tiles[newX][newY].piece != undefined){
     players[turns%2].points += tiles[newX][newY].piece.points; //add points to player
-    createHint((turns+1)%2); //create hint of colors of opposing player's keyholder
+    console.log('piece captured');
+    if(tiles[newX][newY].piece == players[(turns+1)%2].keyHolder){
+      removeKeyholder((turns+1)%2);
+    }else{
+      createHint((turns+1)%2); //create hint of colors of opposing player's keyholder
+    }
     removePiece(tiles[newX][newY].piece);
   }
   tiles[newX][newY].piece = piece; //add piece in new location
@@ -129,7 +154,13 @@ function movePiece(piece, newX, newY){
     tiles[oldX][oldY].cell.removeChild(tiles[oldX][oldY].cell.lastChild);
   }
 
-  if(piece.constructor.name == "Pawn"){piece.hasMoved = true}
+  if(piece.id == "p"){piece.hasMoved = true}
+}
+function removeKeyholder(cside){
+  console.log('keyholder ded');
+  players[cside].isLocked = false;
+  console.log(players[cside].side)
+  eval(players[cside].side+'k').unlock();
 }
 function removePiece(piece){
   pieces.splice(pieces.indexOf(piece), 1);
@@ -139,6 +170,13 @@ function holdPiece(piece){
   if(highlightedCells.length != 0){
     //tile.piece.visible = false
     for(let i = 0; i < highlightedCells.length; i++){
+      let cellPiece = tiles[highlightedCells[i][0]][highlightedCells[i][1]].piece;
+      if(cellPiece != undefined){ //check if locked king
+        if(cellPiece.isLocked){
+          highlightedCells.splice(i,1);
+          i--;
+        }
+      }
       tiles[highlightedCells[i][0]][highlightedCells[i][1]].cell.classList.add('highlight');
     }
   }else{ //make nothing happen if there are no possible moves
@@ -170,8 +208,9 @@ function tileClicked(x,y){
 function gameSetup(x,y){
   let tile = tiles[x][y];
   if(tile.piece != undefined){
-    if(tile.piece.side == side){
+    if(tile.piece.side == side && tile.piece.id != 'k'){
       players[turns%2].keyHolder = tile.piece;
+      console.log(side+' keyholder is '+tile.piece.constructor.name);
       nextTurn();
     }
   }
@@ -208,15 +247,15 @@ function inGameProcess(x,y){
 }
 function nextTurn(){
   turns++;
-  if(turns%2 == 0){
-    document.getElementById('log').innerHTML = 'white turn';
-  }else{
-    document.getElementById('log').innerHTML = 'black turn';
-  }
   if(turns < 2){
-    document.getElementById('phase').innerHTML = 'pick key';
+    document.getElementById('turn').innerHTML = 'pick key - ';
   }else{
-    document.getElementById('phase').innerHTML = 'play game';
+    document.getElementById('turn').innerHTML = 'play game - ';
+  }
+  if(turns%2 == 0){
+    document.getElementById('turn').innerHTML += 'white turn';
+  }else{
+    document.getElementById('turn').innerHTML += 'black turn';
   }
 }
 
@@ -237,7 +276,7 @@ function asciiPrint(){ //terrible formatting, gotta learn how to ascii
 }
 
 function createHint(side){
-  let rColor = players[side].keyHolder.colors[Math.floor(Math.random()*piece.colors.length)];
+  let rColor = players[side].keyHolder.colors[Math.floor(Math.random()*players[side].keyHolder.colors.length)];
   console.log(rColor);
 }
 window.onload = function(){
@@ -247,8 +286,6 @@ window.onload = function(){
 
     makeBoard();
     defaultBoardInit();
-
-    replaceImages();
   }
 }
 
@@ -264,3 +301,16 @@ Array.prototype.containsCoordinate = function(x,y){
   }
   return false;
 }
+
+/*todo
+key mechanic:
+  - make hints non repeatable / what color it isnt
+  - win state
+  - hint log
+
+UI:
+  - aspect ratio / resizing
+  - log
+  - captured pieces
+  - hints
+*/

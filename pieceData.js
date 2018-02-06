@@ -156,7 +156,7 @@ Pawn.prototype.checkMove = function(){ //move check
     if(tiles[c][r].piece == undefined){
       available.push([c,r])
       r += direction;
-      if(tiles[c][r].piece == undefined && !this.hasMoved){available.push([c,r])}
+      if(!this.hasMoved){if(tiles[c][r].piece == undefined){available.push([c,r])}}
       r -= direction;
     }
 

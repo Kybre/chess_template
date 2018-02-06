@@ -77,7 +77,7 @@ function makeBoard(){
 function defaultBoardInit(){
   resetTiles();
   resetPlayers();
-  
+
   pieces = new Array(); //array that holds all active pieces
   wk = new King(3, 0, "w"); pieces.push(wk);
   wq = new Queen(4, 0, "w"); pieces.push(wq);
@@ -205,12 +205,12 @@ function tileClicked(x,y){
   }
   replaceImages();
 }
-function gameSetup(x,y){
+function gameSetup(x,y){ //picking keyholder
   let tile = tiles[x][y];
   if(tile.piece != undefined){
     if(tile.piece.side == side && tile.piece.id != 'k'){
       players[turns%2].keyHolder = tile.piece;
-      console.log(side+' keyholder is '+tile.piece.constructor.name);
+      //console.log(side+' keyholder is '+tile.piece.constructor.name);
       nextTurn();
     }
   }
@@ -304,6 +304,7 @@ Array.prototype.containsCoordinate = function(x,y){
 
 /*todo
 key mechanic:
+  - trading pawns
   - make hints non repeatable / what color it isnt
   - win state
   - hint log

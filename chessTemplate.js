@@ -160,6 +160,7 @@ function removeKeyholder(cside){
   console.log('keyholder ded');
   players[cside].isLocked = false;
   console.log(players[cside].side)
+  document.getElementById('left-sidebar').innerHTML+= '<br>'+side+' captured keyholder';
   eval(players[cside].side+'k').unlock();
 }
 function removePiece(piece){
@@ -276,6 +277,9 @@ function asciiPrint(){ //terrible formatting, gotta learn how to ascii
 }
 
 function createHint(nside){
+  if(!players[nside].isLocked){
+    return;
+  }
   let rColor = players[nside].keyHolder.colors[Math.floor(Math.random()*players[nside].keyHolder.colors.length)];
   document.getElementById('left-sidebar').innerHTML += '<br>' +side+' hint: '+ rColor;
   console.log(rColor);

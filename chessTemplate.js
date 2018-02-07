@@ -275,8 +275,9 @@ function asciiPrint(){ //terrible formatting, gotta learn how to ascii
   }
 }
 
-function createHint(side){
-  let rColor = players[side].keyHolder.colors[Math.floor(Math.random()*players[side].keyHolder.colors.length)];
+function createHint(nside){
+  let rColor = players[nside].keyHolder.colors[Math.floor(Math.random()*players[nside].keyHolder.colors.length)];
+  document.getElementById('left-sidebar').innerHTML += '<br>' +side+' hint: '+ rColor;
   console.log(rColor);
 }
 window.onload = function(){

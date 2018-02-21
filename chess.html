@@ -10,14 +10,21 @@
   <div id='startScreenOverlay' class='overlay'>
     <button id="button">start</button>
   </div>
-  <div id='game' class='flex-container'>
-    <div id='left-sidebar' class='sidebar'>
+  <div id='game'>
+    <div class = 'flex-container'>
+      <div id='left-sidebar' class='sidebar'>
 
+      </div>
+      <table id = "board"></table>
+      <div id='right-sidebar' class='sidebar'>
+        <p id = "turn">pick key - white turn</p>
+      </div>
+      <button onclick="defaultBoardInit();">restart</button>
     </div>
-    <table id = "board"></table>
-    <div id='right-sidebar' class='sidebar'>
-      <p id = "turn">pick key - white turn</p>
-    </div>
-    <button onclick="defaultBoardInit();">restart</button>
   </div>
+  <table class='promotion-popup'>
+    <td class='white' onclick="promotionClicked('r')"><img src="images/br.png"></td>
+    <td class='black' onclick="promotionClicked('b')"><img src="images/bb.png"></td>
+    <td class='white' onclick="promotionClicked('n')"><img src="images/bn.png"></td>
+  </table>
 </body>

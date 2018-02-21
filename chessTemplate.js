@@ -1,4 +1,4 @@
-//Board:
+//sombody toucha my spaghettcode
 let BOARD_SIZE = 8;
 let pieces = new Array(); //list of all pieces
 
@@ -8,6 +8,7 @@ let bk, bq, br1, br2, bn1, bn2, bb1, bb2;// vars for black pieces, wp1-8 are add
 
 let turns = 0;
 let side = 'w';
+let state = 'pickKeyholder';
 
 let holdingPiece;
 let highlightedCells = new Array();
@@ -77,6 +78,8 @@ function makeBoard(){
 function defaultBoardInit(){
   resetTiles();
   resetPlayers();
+  document.getElementById('left-sidebar').innerHTML = '';
+  state = 'pickKeyholder';
 
   pieces = new Array(); //array that holds all active pieces
   wk = new King(3, 0, "w"); pieces.push(wk);
@@ -154,7 +157,13 @@ function movePiece(piece, newX, newY){
     tiles[oldX][oldY].cell.removeChild(tiles[oldX][oldY].cell.lastChild);
   }
 
-  if(piece.id == "p"){piece.hasMoved = true}
+  if(piece.id == "p"){
+    piece.hasMoved = true;
+    if(newY == 0 || newY == 7){ //promote pawn
+      state = 'promotePawn';
+      holdingPiece = piece;
+    }
+  }
 }
 function removeKeyholder(cside){
   console.log('keyholder ded');
@@ -197,14 +206,33 @@ function removeHighlights(){
     tiles[highlightedCells[i][0]][highlightedCells[i][1]].cell.classList.remove('highlight');
   }
 }
+
+function swapPiece(piece, newid){
+  let colors = piece.colors;
+  let newPiece = new pieceConstructor[newid](piece.column, piece.row, piece.side);
+  newPiece.colors = colors;
+  pieces[pieces.findIndex(x => x == piece)] = newPiece;
+  piece = newPiece;
+  tiles[piece.row][piece.column].piece = piece;
+  replaceImages();
+}
+
 function tileClicked(x,y){
   if(turns%2 == 0){side = 'w'}else{side = 'b'}
-  if(turns < 2){
+  if(state == 'pickKeyholder'){
     gameSetup(x,y);
-  }else{
+  }else if(state == 'game'){
     inGameProcess(x,y);
   }
   replaceImages();
+}
+function promotionClicked(p){
+  if(state = 'promotePawn'){
+    swapPiece(holdingPiece, p);
+    holdingPiece = undefined;
+    state = 'game';
+    nextTurn();
+  }
 }
 function gameSetup(x,y){ //picking keyholder
   let tile = tiles[x][y];
@@ -240,19 +268,27 @@ function inGameProcess(x,y){
       if(highlightedCells.containsCoordinate(x,y)){ //make sure of new location
         removeHighlights();
         movePiece(holdingPiece, x,y); //move piece to desired location if a piece is being held
-        holdingPiece = undefined; //stop holding piece
         nextTurn();
       }
     }
   }
 }
 function nextTurn(){
-  turns++;
-  if(turns < 2){
-    document.getElementById('turn').innerHTML = 'pick key - ';
-  }else{
-    document.getElementById('turn').innerHTML = 'play game - ';
+  if(state != 'promotePawn'){
+    holdingPiece = undefined; //stop holding piece
+    turns++;
+    if(turns >= 2){
+      state = 'game';
+    }
   }
+  if(state == 'pickKeyholder'){
+    document.getElementById('turn').innerHTML = 'pick key - ';
+  }else if(state == 'game'){
+    document.getElementById('turn').innerHTML = 'play game - ';
+  }else{
+    document.getElementById('turn').innerHTML = 'promote pawn - ';
+  }
+
   if(turns%2 == 0){
     document.getElementById('turn').innerHTML += 'white turn';
   }else{
@@ -281,7 +317,7 @@ function createHint(nside){
     return;
   }
   let rColor = players[nside].keyHolder.colors[Math.floor(Math.random()*players[nside].keyHolder.colors.length)];
-  document.getElementById('left-sidebar').innerHTML += '<br>' +side+' hint: '+ rColor;
+  document.getElementById('left-sidebar').innerHTML += '<br>' +side+" hint: <span style='color:"+colors[rColor] +"'>"+ rColor +"</span>";
   console.log(rColor);
 }
 window.onload = function(){
@@ -309,10 +345,8 @@ Array.prototype.containsCoordinate = function(x,y){
 
 /*todo
 key mechanic:
-  - trading pawns
   - make hints non repeatable / what color it isnt
   - win state
-  - hint log
 
 UI:
   - aspect ratio / resizing

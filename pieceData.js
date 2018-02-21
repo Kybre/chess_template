@@ -1,3 +1,12 @@
+let pieceConstructor = {
+  k: King,
+  q: Queen,
+  r: Rook,
+  n: Knight,
+  b: Bishop,
+  p: Pawn,
+}
+
 function Piece(points, img, row, column, side, id){ //piece class
   /*main pieces will only have the points, img, and movement parameters
   omitting the last 3 parameters for the main pieces will not ruin anything and will keep the location and side undefined

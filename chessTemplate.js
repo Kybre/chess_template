@@ -138,6 +138,8 @@ function movePiece(piece, newX, newY){
 
   tiles[piece.column][piece.row].piece = undefined; //get rid of old piece
 
+  document.getElementById('left-sidebar').innerHTML += '<br>' +side+" move: "+ piece.id +" to x:" +newX + ", y:"+newY;
+
   if(tiles[newX][newY].piece != undefined){
     players[turns%2].points += tiles[newX][newY].piece.points; //add points to player
     console.log('piece captured');
@@ -227,7 +229,7 @@ function tileClicked(x,y){
   replaceImages();
 }
 function promotionClicked(p){
-  if(state = 'promotePawn'){
+  if(state == 'promotePawn'){
     swapPiece(holdingPiece, p);
     holdingPiece = undefined;
     state = 'game';

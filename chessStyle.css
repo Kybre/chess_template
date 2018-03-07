@@ -67,6 +67,8 @@ td:hover{
   background-color: beige;
   width: 20%;
   height: 80.5vmin;
+
+  overflow: auto
 }
 .black{
   background-color: peru;

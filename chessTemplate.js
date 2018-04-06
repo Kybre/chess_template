@@ -79,6 +79,7 @@ function defaultBoardInit(){
   resetTiles();
   resetPlayers();
   document.getElementById('left-sidebar').innerHTML = '';
+  document.getElementById('turn').innerHTML = 'pick key - white turn';
   state = 'pickKeyholder';
 
   pieces = new Array(); //array that holds all active pieces
@@ -145,6 +146,8 @@ function movePiece(piece, newX, newY){
     console.log('piece captured');
     if(tiles[newX][newY].piece == players[(turns+1)%2].keyHolder){
       removeKeyholder((turns+1)%2);
+    }else if(tiles[newX][newY].piece.id == 'k'){
+      state = 'gameOver';
     }else{
       createHint((turns+1)%2); //create hint of colors of opposing player's keyholder
     }
@@ -276,25 +279,29 @@ function inGameProcess(x,y){
   }
 }
 function nextTurn(){
-  if(state != 'promotePawn'){
-    holdingPiece = undefined; //stop holding piece
-    turns++;
-    if(turns >= 2){
-      state = 'game';
+  if(state == 'gameOver'){
+    document.getElementById('turn').innerHTML = side + ' side wins!';
+  }else{
+    if(state != 'promotePawn'){
+      holdingPiece = undefined; //stop holding piece
+      turns++;
+      if(turns >= 2){
+        state = 'game';
+      }
     }
-  }
-  if(state == 'pickKeyholder'){
-    document.getElementById('turn').innerHTML = 'pick key - ';
-  }else if(state == 'game'){
-    document.getElementById('turn').innerHTML = 'play game - ';
-  }else{
-    document.getElementById('turn').innerHTML = 'promote pawn - ';
-  }
+    if(state == 'pickKeyholder'){
+      document.getElementById('turn').innerHTML = 'pick key - ';
+    }else if(state == 'game'){
+      document.getElementById('turn').innerHTML = 'play game - ';
+    }else{
+      document.getElementById('turn').innerHTML = 'promote pawn - ';
+    }
 
-  if(turns%2 == 0){
-    document.getElementById('turn').innerHTML += 'white turn';
-  }else{
-    document.getElementById('turn').innerHTML += 'black turn';
+    if(turns%2 == 0){
+      document.getElementById('turn').innerHTML += 'white turn';
+    }else{
+      document.getElementById('turn').innerHTML += 'black turn';
+    }
   }
 }
 
@@ -312,6 +319,42 @@ function asciiPrint(){ //terrible formatting, gotta learn how to ascii
     }
     console.log(str);
   }
+}
+
+function getFEN(){
+  let string = '';
+
+  // Piece placement
+  for(let row = 0; row < 8; row++){
+    for(let column = 0; column < 8; column++){
+      if(tiles[column][row].piece != undefined){
+        if(tiles[column][row].piece.side == 'w'){
+          string += tiles[column][row].piece.id;
+        }else{
+          string += tiles[column][row].piece.id.toUpperCase();
+        }
+      }else{
+        let emptyTiles = 0;
+        for(column; column < 8 && tiles[column][row].piece == undefined; column++){
+          emptyTiles++;
+        }
+        string += emptyTiles;
+        column--;
+      }
+    }
+    if(row<7){string += '/'}
+  }
+  //active color
+  string += ' '+side;
+  //castling ability (no castling)
+  string += ' -';
+  //en passant target square (no)
+  string += ' -';
+  //halfmove clock (wtf i dont get this)
+  string += ' 0';
+  //fullmove number
+  string += ' '+(turns - (turns%2)+1);
+  return string;
 }
 
 function createHint(nside){

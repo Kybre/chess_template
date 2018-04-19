@@ -8,7 +8,8 @@ let bk, bq, br1, br2, bn1, bn2, bb1, bb2;// vars for black pieces, wp1-8 are add
 
 let turns = 0;
 let side = 'w';
-let state = 'pickKeyholder';
+let state = 'pickKeyholder';// 'pickKeyholder', 'game', 'gameOver', 'promotePawn'
+let gamemode; //'traditional', 'coldWar'
 
 let holdingPiece;
 let highlightedCells = new Array();
@@ -80,7 +81,12 @@ function defaultBoardInit(){
   resetPlayers();
   document.getElementById('left-sidebar').innerHTML = '';
   document.getElementById('turn').innerHTML = 'pick key - white turn';
-  state = 'pickKeyholder';
+  if(gamemode == 'coldWar'){
+    state = 'pickKeyholder';
+  }else if(gamemode == 'traditional'){
+    state = 'game';
+  }
+
 
   pieces = new Array(); //array that holds all active pieces
   wk = new King(3, 0, "w"); pieces.push(wk);
@@ -149,7 +155,9 @@ function movePiece(piece, newX, newY){
     }else if(tiles[newX][newY].piece.id == 'k'){
       state = 'gameOver';
     }else{
-      createHint((turns+1)%2); //create hint of colors of opposing player's keyholder
+      if(gamemode == 'coldWar'){
+        createHint((turns+1)%2); //create hint of colors of opposing player's keyholder
+      }
     }
     removePiece(tiles[newX][newY].piece);
   }
@@ -366,13 +374,17 @@ function createHint(nside){
   console.log(rColor);
 }
 window.onload = function(){
-  document.getElementById('button').onclick = function(){
-    document.getElementById('startScreenOverlay').style.display = 'none';
-    document.getElementById('game').style.display = 'flex';
+  document.getElementById('coldWarChess').onclick = function(){enterGameScreen('coldWar');}
+  document.getElementById('regularChess').onclick = function(){enterGameScreen('traditional');}
+}
 
-    makeBoard();
-    defaultBoardInit();
-  }
+function enterGameScreen(mode){
+  document.getElementById('startScreenOverlay').style.display = 'none';
+  document.getElementById('game').style.display = 'flex';
+  gamemode = mode;
+
+  makeBoard();
+  defaultBoardInit();
 }
 
 Array.prototype.pushArray = function(arr) {

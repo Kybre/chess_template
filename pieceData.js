@@ -19,9 +19,12 @@ function Piece(points, img, row, column, side, id){ //piece class
   this.id = id;
 
   this.visible = true;
-  this.colors = ['Red', 'Yellow', 'Green', 'Light Blue', 'Dark Blue', 'Pink'];
-  for(let i = 0; i < 3; i++){
-    this.colors.splice(Math.floor(Math.random()*this.colors.length),1);
+  this.colors = [];
+  if(gamemode == 'coldWar'){
+    this.colors = ['Red', 'Yellow', 'Green', 'Light Blue', 'Dark Blue', 'Pink'];
+    for(let i = 0; i < 3; i++){
+      this.colors.splice(Math.floor(Math.random()*this.colors.length),1);
+    }
   }
 
 }
@@ -56,11 +59,18 @@ function King(column, row, side){ //create king class
   let img = new Image();
   img.src = 'images/'+side+'k.png';
   Piece.call(this, 0, img, row, column, side, 'k'); //inherit from Piece
-  this.colors = ['Grey']; //remove colors from king
+  this.colors = [];
+  if(gamemode == 'coldWar'){
+    this.colors = ['Grey']; //remove colors from king
+    isLocked = true;
+  }else if(gamemode == 'traditional'){
+    isLocked = false;
+  }
+
 }
 King.prototype = Object.create(Piece.prototype); //base prototype off of Piece
 King.prototype.constructor = King; //make constructor
-King.prototype.isLocked = true;
+King.prototype.isLocked /*= true*/;
 King.prototype.checkMove = function(){ //move check
   let available = new Array(); //array of possible moves
   if(!this.isLocked){
